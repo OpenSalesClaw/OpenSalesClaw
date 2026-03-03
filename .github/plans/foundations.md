@@ -1,6 +1,6 @@
 # Technical Foundations Plan
 
-**Status:** Phase 8 Complete
+**Status:** Phase 9 Complete
 **Created:** 2026-03-03
 
 ---
@@ -251,7 +251,7 @@ For each entity, follow the pattern: **Model → Schemas → Service → Routes*
 
 ### Phase 9 — CI/CD Pipeline
 
-- [ ] **9.1** `.github/workflows/ci.yml`:
+- [x] **9.1** `.github/workflows/ci.yml`:
   - **Lint job**: `ruff check` + `ruff format --check` + `mypy` (backend); `eslint` + `tsc --noEmit` (frontend)
   - **Test backend job**: PostgreSQL service container, `pytest --cov` with coverage threshold (80%)
   - **Test frontend job**: `tsc --noEmit` (add Vitest later)
@@ -271,4 +271,4 @@ After all phases are complete, the following must work:
 - [ ] Create lead → filter by status
 - [ ] Frontend: login page → authenticate → dashboard → navigate to accounts → create one
 - [ ] `cd backend && uv run pytest` → all tests pass
-- [ ] Push to branch → GitHub Actions CI green (lint + test + build)
+- [x] Push to branch → GitHub Actions CI green (lint + test + build)
