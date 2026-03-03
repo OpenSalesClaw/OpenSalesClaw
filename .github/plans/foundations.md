@@ -1,6 +1,6 @@
 # Technical Foundations Plan
 
-**Status:** Phase 1 Complete
+**Status:** Phase 2 Complete
 **Created:** 2026-03-03
 
 ---
@@ -56,9 +56,9 @@ Stand up the full-stack skeleton: PostgreSQL schema with 5 core tables (users, a
 
 ### Phase 2 — Database Schema
 
-- [ ] **2.1** Create `schema/schema.sql` with a reusable `set_updated_at()` trigger function that auto-sets `updated_at = NOW()` on every update, attached to all tables.
+- [x] **2.1** Create `schema/schema.sql` with a reusable `set_updated_at()` trigger function that auto-sets `updated_at = NOW()` on every update, attached to all tables.
 
-- [ ] **2.2** **`users`** table:
+- [x] **2.2** **`users`** table:
   - `id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY`
   - `sfid VARCHAR(40)`
   - `email VARCHAR(255) NOT NULL UNIQUE`, `hashed_password VARCHAR(255) NOT NULL`
@@ -67,7 +67,7 @@ Stand up the full-stack skeleton: PostgreSQL schema with 5 core tables (users, a
   - Standard columns: `custom_fields`, `owner_id`, `created_by_id`, `updated_by_id`, `created_at`, `updated_at`, `is_deleted`, `deleted_at`, `deleted_by_id`
   - Index on `email`
 
-- [ ] **2.3** **`accounts`** table:
+- [x] **2.3** **`accounts`** table:
   - `name VARCHAR(255) NOT NULL`
   - `type VARCHAR(50)` — picklist: Customer, Partner, Prospect, Vendor, Other
   - `industry VARCHAR(100)`, `website VARCHAR(255)`, `phone VARCHAR(40)`
@@ -76,7 +76,7 @@ Stand up the full-stack skeleton: PostgreSQL schema with 5 core tables (users, a
   - Standard columns
   - Indexes on `name`, `owner_id`
 
-- [ ] **2.4** **`contacts`** table:
+- [x] **2.4** **`contacts`** table:
   - `account_id BIGINT REFERENCES accounts(id)`
   - `first_name VARCHAR(100)`, `last_name VARCHAR(100) NOT NULL`
   - `email VARCHAR(255)`, `phone VARCHAR(40)`, `mobile_phone VARCHAR(40)`
@@ -85,7 +85,7 @@ Stand up the full-stack skeleton: PostgreSQL schema with 5 core tables (users, a
   - Standard columns
   - Indexes on `account_id`, `email`, `last_name`
 
-- [ ] **2.5** **`leads`** table:
+- [x] **2.5** **`leads`** table:
   - `first_name VARCHAR(100)`, `last_name VARCHAR(100) NOT NULL`
   - `email VARCHAR(255)`, `phone VARCHAR(40)`, `company VARCHAR(255) NOT NULL`
   - `title VARCHAR(128)`, `status VARCHAR(50) NOT NULL DEFAULT 'New'` — New, Contacted, Qualified, Unqualified, Converted
@@ -94,7 +94,7 @@ Stand up the full-stack skeleton: PostgreSQL schema with 5 core tables (users, a
   - Standard columns
   - Indexes on `email`, `status`, `company`
 
-- [ ] **2.6** **`custom_field_definitions`** table:
+- [x] **2.6** **`custom_field_definitions`** table:
   - `object_name VARCHAR(100) NOT NULL` (e.g., `'accounts'`, `'contacts'`)
   - `field_name VARCHAR(100) NOT NULL`, `field_label VARCHAR(255)`
   - `field_type VARCHAR(50) NOT NULL` — Text, Number, Date, DateTime, Boolean, Picklist, MultiPicklist, Email, URL, TextArea, Currency
