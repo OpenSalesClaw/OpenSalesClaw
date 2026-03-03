@@ -1,6 +1,6 @@
 # Technical Foundations Plan
 
-**Status:** Phase 4 Complete
+**Status:** Phase 5 Complete
 **Created:** 2026-03-03
 
 ---
@@ -170,9 +170,9 @@ For each entity, follow the pattern: **Model → Schemas → Service → Routes*
 
 ### Phase 5 — Alembic Migrations
 
-- [ ] **5.1** Initialize Alembic in `backend/alembic/` with async configuration pointing at `DATABASE_URL`. Configure `env.py` to import `Base.metadata` from models for autogenerate.
+- [x] **5.1** Initialize Alembic in `backend/alembic/` with async configuration pointing at `DATABASE_URL`. Configure `env.py` to import `Base.metadata` from models for autogenerate.
 
-- [ ] **5.2** Generate initial migration creating all 5 tables + the `set_updated_at` trigger.
+- [x] **5.2** Generate initial migration creating all 5 tables + the `set_updated_at` trigger.
 
 ---
 
