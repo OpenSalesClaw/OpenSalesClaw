@@ -13,12 +13,18 @@ Strategy:
 """
 
 # ---------------------------------------------------------------------------
-# Test database URL — override via env var TEST_DATABASE_URL if needed.
+# Load .env from the project root (two levels up from this file) so that
+# running `uv run pytest` bare — without manually exporting env vars — picks
+# up TEST_DATABASE_URL / DATABASE_URL automatically.  In CI these variables
+# are injected by the workflow, so dotenv is a no-op there (existing values
+# are never overwritten thanks to ``override=False``).
 # ---------------------------------------------------------------------------
 import os
 from collections.abc import AsyncGenerator
+from pathlib import Path
 
 import pytest
+from dotenv import load_dotenv
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
@@ -26,6 +32,10 @@ import app.models  # noqa: F401 – ensure all models are registered on Base.met
 from app.core.database import get_db
 from app.main import app
 from app.models.base import Base
+
+# Resolve the repo root (.env lives next to docker-compose.yml)
+_repo_root = Path(__file__).resolve().parents[2]
+load_dotenv(_repo_root / ".env", override=False)
 
 TEST_DATABASE_URL = (
     os.getenv("TEST_DATABASE_URL")
