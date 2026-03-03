@@ -36,6 +36,9 @@ services:
       SECRET_KEY: ${SECRET_KEY:-change-me-to-a-long-random-secret-key}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
       CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:3000"]}
+      DEFAULT_ADMIN_EMAIL: ${DEFAULT_ADMIN_EMAIL:-admin@opensalesclaw.com}
+      DEFAULT_ADMIN_PASSWORD: ${DEFAULT_ADMIN_PASSWORD:-admin}
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-false}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"

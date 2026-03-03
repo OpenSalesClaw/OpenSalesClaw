@@ -11,6 +11,15 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["http://localhost:3000"]
     app_name: str = "OpenSalesClaw"
 
+    # ---------------------------------------------------------------------------
+    # Seeding
+    # ---------------------------------------------------------------------------
+    # Always creates the default admin user on startup.
+    # Set SEED_DEMO_DATA=true to also populate demo CRM records.
+    default_admin_email: str = "admin@opensalesclaw.com"
+    default_admin_password: str = "admin"
+    seed_demo_data: bool = False
+
     @field_validator("cors_origins", mode="before")
     @classmethod
     def parse_cors_origins(cls, v: object) -> object:

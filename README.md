@@ -139,6 +139,52 @@ npm run dev        # Vite dev server at http://localhost:5173
 
 ---
 
+## Seeding
+
+### Default admin user
+
+A default admin user is **always created automatically** on first startup. No manual step is required.
+
+| Setting | Default | Environment variable |
+|---------|---------|----------------------|
+| Email | `admin@opensalesclaw.com` | `DEFAULT_ADMIN_EMAIL` |
+| Password | `admin` | `DEFAULT_ADMIN_PASSWORD` |
+
+The admin user is only created if no user with that email already exists — creation is **idempotent**.
+
+### Demo CRM data
+
+To populate the database with realistic demo records (~20 accounts, ~50 contacts, ~30 leads) set `SEED_DEMO_DATA=true`. Demo data is also idempotent and will be skipped if it detects existing records.
+
+```bash
+# Docker Compose — set the variable and restart
+SEED_DEMO_DATA=true docker compose up -d
+
+# Local development — add to your .env file
+echo "SEED_DEMO_DATA=true" >> .env
+uv run uvicorn app.main:app --reload
+```
+
+> **Dev environment:** `docker-compose.override.yml` sets `SEED_DEMO_DATA=true` by default, so demo data is seeded automatically when running in development mode. Production (`docker-compose.yml`) defaults to `false`.
+
+### Overriding admin credentials
+
+Set environment variables before starting the backend:
+
+```bash
+DEFAULT_ADMIN_EMAIL=me@mycompany.com DEFAULT_ADMIN_PASSWORD=supersecret docker compose up -d
+```
+
+Or add them to your `.env` file:
+
+```dotenv
+DEFAULT_ADMIN_EMAIL=me@mycompany.com
+DEFAULT_ADMIN_PASSWORD=supersecret
+SEED_DEMO_DATA=true
+```
+
+---
+
 ## Architecture
 
 ### Database Design Principles
