@@ -1,6 +1,6 @@
 # Technical Foundations Plan
 
-**Status:** Phase 6 Complete
+**Status:** Phase 7 Complete
 **Created:** 2026-03-03
 
 ---
@@ -197,29 +197,29 @@ For each entity, follow the pattern: **Model → Schemas → Service → Routes*
 
 ### Phase 7 — Frontend Shell
 
-- [ ] **7.1** Initialize Vite + React + TypeScript project in `frontend/` with strict TypeScript config.
+- [x] **7.1** Initialize Vite + React + TypeScript project in `frontend/` with strict TypeScript config.
 
-- [ ] **7.2** `frontend/src/api/client.ts` — Axios instance:
+- [x] **7.2** `frontend/src/api/client.ts` — Axios instance:
   - Base URL from env var
   - Automatic `Authorization` header injection from stored token
   - Response interceptor: 401 → redirect to login
 
-- [ ] **7.3** `frontend/src/stores/authStore.ts` — Zustand store:
+- [x] **7.3** `frontend/src/stores/authStore.ts` — Zustand store:
   - State: `token`, `user`, `isAuthenticated`
   - Actions: `login()`, `logout()`
   - Persist token in `localStorage`
 
-- [ ] **7.4** `frontend/src/pages/LoginPage.tsx` — email + password form → call login endpoint → store token → redirect to dashboard.
+- [x] **7.4** `frontend/src/pages/LoginPage.tsx` — email + password form → call login endpoint → store token → redirect to dashboard.
 
-- [ ] **7.5** `frontend/src/pages/DashboardPage.tsx` — placeholder authenticated page.
+- [x] **7.5** `frontend/src/pages/DashboardPage.tsx` — placeholder authenticated page.
 
-- [ ] **7.6** `frontend/src/pages/AccountsPage.tsx` — fetch + display paginated accounts table. "New Account" button with simple create form.
+- [x] **7.6** `frontend/src/pages/AccountsPage.tsx` — fetch + display paginated accounts table. "New Account" button with simple create form.
 
-- [ ] **7.7** `frontend/src/App.tsx` — React Router:
+- [x] **7.7** `frontend/src/App.tsx` — React Router:
   - Routes: `/login`, `/` (dashboard), `/accounts`, `/contacts`, `/leads`
   - `ProtectedRoute` component wrapping authenticated routes
 
-- [ ] **7.8** `frontend/src/components/Layout.tsx` — sidebar nav (Accounts, Contacts, Leads) + top bar (user info, logout). Minimal but functional.
+- [x] **7.8** `frontend/src/components/Layout.tsx` — sidebar nav (Accounts, Contacts, Leads) + top bar (user info, logout). Minimal but functional.
 
 ---
 
