@@ -73,15 +73,17 @@ Custom field values are validated at the application layer using dynamically-gen
 
 | Layer | Technology |
 |-------|------------|
-| **Database** | PostgreSQL |
-| **API** | FastAPI (Python) |
-| **ORM & Migrations** | SQLAlchemy + Alembic |
-| **Validation** | Pydantic |
+| **Database** | PostgreSQL 16 |
+| **API** | FastAPI (Python 3.11+) |
+| **ORM & Migrations** | SQLAlchemy 2.x + Alembic |
+| **Validation** | Pydantic v2 |
 | **API Docs** | OpenAPI (auto-generated) |
-| **Auth** | OAuth 2.0 |
-| **Frontend** | React + Vite |
+| **Auth** | OAuth 2.0 / JWT |
+| **Frontend** | React 19 + Vite + TypeScript |
+| **State Management** | Zustand |
+| **HTTP Client** | Axios |
 | **Containerisation** | Docker & Docker Compose |
-| **Reverse Proxy / SSL** | Traefik |
+| **Reverse Proxy / SSL** | Traefik v3 |
 | **CI/CD** | GitHub Actions |
 
 ---
@@ -100,16 +102,40 @@ Custom field values are validated at the application layer using dynamically-gen
 git clone https://github.com/YOUR_ORG/OpenSalesClaw.git
 cd OpenSalesClaw
 
-# Start the stack
+# Configure environment variables
+cp .env.example .env
+# Edit .env and set a strong SECRET_KEY
+
+# Start the full stack (database, backend, frontend, Traefik)
 docker compose up -d
 
-# Apply the database schema
-docker compose exec db psql -U opensalesclaw -d opensalesclaw -f /schema/schema.sql
+# Run database migrations
+docker compose exec backend alembic upgrade head
 ```
 
-The API will be available at `http://localhost:8000` and interactive docs at `http://localhost:8000/docs`.
+| Service | URL |
+|---------|-----|
+| Frontend | `http://localhost` |
+| API | `http://localhost/api` |
+| Interactive API docs | `http://localhost/api/docs` |
+| Traefik dashboard | `http://localhost:8080` |
 
-> **Note:** Detailed setup instructions, environment variable reference, and production deployment guides are coming soon.
+### Local Development (without Docker)
+
+```bash
+# Backend (requires Python 3.11+ and uv)
+cd backend
+uv sync
+uv run alembic upgrade head
+uv run uvicorn app.main:app --reload
+
+# Frontend (requires Node.js 18+)
+cd frontend
+npm install
+npm run dev        # Vite dev server at http://localhost:5173
+```
+
+> **Note:** Set `CORS_ORIGINS=["http://localhost:5173"]` in your `.env` when running the frontend via Vite.
 
 ---
 
@@ -142,11 +168,31 @@ For a deep dive, see [design/custom-tables-fields-architecture.md](design/custom
 ## Project Structure
 
 ```
+├── .github/              # GitHub Actions workflows & Copilot config
 ├── design/               # Architecture decision records & design docs
-├── salesforce/            # Salesforce object metadata (CSVs) used as reference
-│   └── objects/core/      # Account, Contact, Lead, Opportunity, Case, User, RecordType
+├── salesforce/           # Salesforce object metadata (CSVs) used as reference
+│   └── objects/core/
 ├── schema/
-│   └── schema.sql         # Full PostgreSQL schema (tables, indexes, triggers, seeds)
+│   └── schema.sql        # Full PostgreSQL schema (tables, indexes, triggers)
+├── backend/              # FastAPI application (Python 3.11+)
+│   ├── app/
+│   │   ├── api/          # Route handlers (accounts, contacts, leads, auth)
+│   │   ├── models/       # SQLAlchemy ORM models
+│   │   ├── schemas/      # Pydantic request/response schemas
+│   │   ├── services/     # Business logic layer
+│   │   ├── core/         # Config, security, dependencies, exceptions
+│   │   └── main.py       # FastAPI app entry point
+│   ├── alembic/          # Database migrations
+│   ├── tests/            # pytest test suite (API & service tests)
+│   └── pyproject.toml
+├── frontend/             # React 19 + Vite + TypeScript application
+│   └── src/
+│       ├── api/          # Axios API client
+│       ├── components/   # Shared UI components
+│       ├── pages/        # Route-level page components
+│       └── stores/       # Zustand state stores
+├── docker-compose.yml
+├── .env.example
 └── README.md
 ```
 
@@ -160,15 +206,19 @@ OpenSalesClaw is in **early development**. Here's what's planned:
 - [x] Custom objects & custom fields architecture (JSONB + metadata tables)
 - [x] Picklist management
 - [x] Multi-currency support
-- [ ] FastAPI REST endpoints for all core objects
-- [ ] OAuth 2.0 authentication & authorization
-- [ ] Alembic migration setup
-- [ ] React frontend (list views, record detail, dashboards)
+- [x] Alembic migration setup
+- [x] FastAPI REST endpoints — Accounts, Contacts, Leads
+- [x] OAuth 2.0 authentication & JWT-based authorization
+- [x] React frontend — Dashboard, Login, Accounts, Contacts, Leads list views
+- [x] Docker Compose production setup with Traefik
+- [x] pytest test suite (API routes & service layer)
+- [ ] FastAPI REST endpoints — Opportunities, Cases, Users, Roles
 - [ ] Sales objects (Products, Pricebooks, Quotes, Orders, Contracts)
 - [ ] Marketing objects (Campaigns, Campaign Members, Email Templates)
 - [ ] Activity objects (Tasks, Events, Notes, Attachments)
+- [ ] Record detail & edit views in the frontend
+- [ ] Role-based access control (RBAC)
 - [ ] Reports & Dashboards engine
-- [ ] Docker Compose production setup with Traefik
 - [ ] CI/CD pipeline (GitHub Actions)
 - [ ] Import/export tooling (CSV, Salesforce migration)
 - [ ] Webhook & event system
