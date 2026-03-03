@@ -26,7 +26,12 @@ from app.models.base import Base
 # ---------------------------------------------------------------------------
 # Test database URL — override via env var TEST_DATABASE_URL if needed.
 # ---------------------------------------------------------------------------
-TEST_DATABASE_URL = "postgresql+asyncpg://postgres:postgres@localhost:5432/opensalesclaw_test"
+import os
+
+TEST_DATABASE_URL = os.getenv(
+    "TEST_DATABASE_URL",
+    "postgresql+asyncpg://postgres:postgres@localhost:5432/opensalesclaw_test",
+)
 
 
 # ---------------------------------------------------------------------------

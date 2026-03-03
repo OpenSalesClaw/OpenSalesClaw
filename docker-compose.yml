@@ -35,7 +35,7 @@ services:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-crm_user}:${POSTGRES_PASSWORD:-crm_password}@db:5432/${POSTGRES_DB:-opensalesclaw}
       SECRET_KEY: ${SECRET_KEY:-change-me-to-a-long-random-secret-key}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:3000"]}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"

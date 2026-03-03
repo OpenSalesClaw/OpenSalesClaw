@@ -72,3 +72,4 @@ async def delete_contact(db: AsyncSession, contact_id: int, deleted_by_id: int |
     contact.is_deleted = True
     contact.deleted_at = datetime.now(UTC)
     contact.deleted_by_id = deleted_by_id
+    await db.flush()

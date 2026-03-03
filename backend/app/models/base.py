@@ -1,13 +1,23 @@
 from datetime import datetime
 
-from sqlalchemy import BigInteger, Boolean, ForeignKey, Text
+from sqlalchemy import BigInteger, Boolean, ForeignKey, MetaData, Text
 from sqlalchemy.dialects.postgresql import JSONB, TIMESTAMP
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.sql import func
 
+# Naming convention ensures SQLAlchemy can emit DROP CONSTRAINT by name for
+# use_alter FK constraints and any other named constraints.
+_NAMING_CONVENTION: dict[str, str] = {
+    "ix": "ix_%(column_0_label)s",
+    "uq": "uq_%(table_name)s_%(column_0_name)s",
+    "ck": "ck_%(table_name)s_%(constraint_name)s",
+    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+    "pk": "pk_%(table_name)s",
+}
+
 
 class Base(DeclarativeBase):
-    pass
+    metadata = MetaData(naming_convention=_NAMING_CONVENTION)
 
 
 class StandardColumns:

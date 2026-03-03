@@ -72,3 +72,4 @@ async def delete_lead(db: AsyncSession, lead_id: int, deleted_by_id: int | None 
     lead.is_deleted = True
     lead.deleted_at = datetime.now(UTC)
     lead.deleted_by_id = deleted_by_id
+    await db.flush()

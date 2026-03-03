@@ -72,3 +72,4 @@ async def delete_account(db: AsyncSession, account_id: int, deleted_by_id: int |
     account.is_deleted = True
     account.deleted_at = datetime.now(UTC)
     account.deleted_by_id = deleted_by_id
+    await db.flush()

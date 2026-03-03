@@ -263,12 +263,12 @@ For each entity, follow the pattern: **Model → Schemas → Service → Routes*
 
 After all phases are complete, the following must work:
 
-- [ ] `docker compose up -d` → all services healthy
-- [ ] `curl http://localhost:8000/api/health` → 200 OK
-- [ ] Register user → login → get token → `GET /api/auth/me` returns user
-- [ ] Create account → list accounts → update → soft-delete → confirm excluded from list
-- [ ] Create contact linked to account → list with filter
-- [ ] Create lead → filter by status
-- [ ] Frontend: login page → authenticate → dashboard → navigate to accounts → create one
-- [ ] `cd backend && uv run pytest` → all tests pass
+- [x] `docker compose up -d` → all services healthy
+- [x] `curl http://localhost:8000/api/health` → 200 OK
+- [x] Register user → login → get token → `GET /api/auth/me` returns user
+- [x] Create account → list accounts → update → soft-delete → confirm excluded from list
+- [x] Create contact linked to account → list with filter
+- [x] Create lead → filter by status
+- [x] Frontend: login page → authenticate → dashboard → navigate to accounts → create one
+- [x] `cd backend && uv run pytest` → all tests pass
 - [x] Push to branch → GitHub Actions CI green (lint + test + build)
