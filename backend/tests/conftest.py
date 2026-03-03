@@ -26,6 +26,7 @@ from pathlib import Path
 import pytest
 from dotenv import load_dotenv
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 import app.models  # noqa: F401 – ensure all models are registered on Base.metadata
@@ -51,14 +52,23 @@ TEST_DATABASE_URL = (
 
 @pytest.fixture(scope="session")
 async def test_engine():
-    """Create the async engine and materialise all tables in the test DB."""
+    """Create the async engine and materialise all tables in the test DB.
+
+    Uses ``DROP SCHEMA public CASCADE`` instead of ``Base.metadata.drop_all``
+    to avoid SQLAlchemy emitting bare ``ALTER TABLE … DROP CONSTRAINT`` for
+    ``use_alter=True`` foreign keys (e.g. the self-referential FKs on the
+    ``users`` table) on a fresh database where those constraints do not yet
+    exist, which would otherwise raise an asyncpg ``UndefinedObjectError``.
+    """
     engine = create_async_engine(TEST_DATABASE_URL, echo=False)
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+        await conn.execute(text("DROP SCHEMA public CASCADE"))
+        await conn.execute(text("CREATE SCHEMA public"))
         await conn.run_sync(Base.metadata.create_all)
     yield engine
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+        await conn.execute(text("DROP SCHEMA public CASCADE"))
+        await conn.execute(text("CREATE SCHEMA public"))
     await engine.dispose()
 
 
