@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -15,7 +15,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
     db: Annotated[AsyncSession, Depends(get_db)],
-) -> dict:
+) -> dict[str, Any]:
     """Decode the Bearer JWT and return the corresponding user row as a dict.
 
     Raises HTTP 401 if the token is invalid, expired, or the user does not exist.
@@ -42,8 +42,8 @@ async def get_current_user(
 
 
 async def get_current_active_user(
-    current_user: Annotated[dict, Depends(get_current_user)],
-) -> dict:
+    current_user: Annotated[dict[str, Any], Depends(get_current_user)],
+) -> dict[str, Any]:
     """Extend *get_current_user* by also asserting the account is active."""
     if not current_user.get("is_active", True):
         raise HTTPException(

@@ -1,5 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
@@ -18,7 +19,7 @@ class AccountCreate(BaseModel):
     description: str | None = None
     annual_revenue: Decimal | None = None
     number_of_employees: int | None = None
-    custom_fields: dict = {}
+    custom_fields: dict[str, Any] = {}
 
 
 class AccountUpdate(BaseModel):
@@ -35,7 +36,7 @@ class AccountUpdate(BaseModel):
     description: str | None = None
     annual_revenue: Decimal | None = None
     number_of_employees: int | None = None
-    custom_fields: dict | None = None
+    custom_fields: dict[str, Any] | None = None
 
 
 class AccountRead(BaseModel):
@@ -55,7 +56,7 @@ class AccountRead(BaseModel):
     description: str | None
     annual_revenue: Decimal | None
     number_of_employees: int | None
-    custom_fields: dict
+    custom_fields: dict[str, Any]
     owner_id: int | None
     created_by_id: int | None
     updated_by_id: int | None

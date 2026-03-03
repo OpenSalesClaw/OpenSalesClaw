@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -21,14 +21,14 @@ async def register(
 ) -> UserRead:
     """Register a new user account."""
     user = await user_service.create_user(db, data)
-    return user
+    return user  # type: ignore[return-value]
 
 
 @router.post("/login")
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Annotated[AsyncSession, Depends(get_db)],
-) -> dict:
+) -> dict[str, Any]:
     """Authenticate with email + password and return an access token."""
     try:
         user = await user_service.authenticate_user(db, form_data.username, form_data.password)
@@ -46,9 +46,9 @@ async def login(
 
 @router.get("/me", response_model=UserRead)
 async def me(
-    current_user: Annotated[dict, Depends(get_current_active_user)],
+    current_user: Annotated[dict[str, Any], Depends(get_current_active_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> UserRead:
     """Return the authenticated user's profile."""
     user = await user_service.get_user_by_id(db, current_user["id"])
-    return user
+    return user  # type: ignore[return-value]

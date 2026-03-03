@@ -1,6 +1,7 @@
 import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from typing import Any
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -69,6 +70,6 @@ app.include_router(leads.router)
 
 
 @app.get("/api/health", tags=["health"])
-async def health() -> dict:
+async def health() -> dict[str, Any]:
     """Returns a simple health-check response."""
     return {"status": "ok", "app": settings.app_name}

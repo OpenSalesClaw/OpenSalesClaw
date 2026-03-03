@@ -37,7 +37,7 @@ async def list_contacts(
 
     query = query.order_by(Contact.last_name.asc()).offset(pagination.offset).limit(pagination.limit)
     result = await db.execute(query)
-    return result.scalars().all(), total
+    return list(result.scalars().all()), total
 
 
 async def create_contact(db: AsyncSession, data: ContactCreate, created_by_id: int | None = None) -> Contact:

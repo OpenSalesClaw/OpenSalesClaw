@@ -37,7 +37,7 @@ async def list_accounts(
 
     query = query.order_by(Account.created_at.desc()).offset(pagination.offset).limit(pagination.limit)
     result = await db.execute(query)
-    return result.scalars().all(), total
+    return list(result.scalars().all()), total
 
 
 async def create_account(db: AsyncSession, data: AccountCreate, created_by_id: int | None = None) -> Account:

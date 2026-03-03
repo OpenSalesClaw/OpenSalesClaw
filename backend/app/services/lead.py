@@ -37,7 +37,7 @@ async def list_leads(
 
     query = query.order_by(Lead.created_at.desc()).offset(pagination.offset).limit(pagination.limit)
     result = await db.execute(query)
-    return result.scalars().all(), total
+    return list(result.scalars().all()), total
 
 
 async def create_lead(db: AsyncSession, data: LeadCreate, created_by_id: int | None = None) -> Lead:

@@ -22,7 +22,7 @@ def create_access_token(subject: str, expires_delta: timedelta | None = None) ->
     """Create a signed JWT token with *subject* as the ``sub`` claim."""
     expire = datetime.now(UTC) + (expires_delta or timedelta(minutes=settings.access_token_expire_minutes))
     payload = {"sub": subject, "exp": expire}
-    return jwt.encode(payload, settings.secret_key, algorithm=ALGORITHM)
+    return str(jwt.encode(payload, settings.secret_key, algorithm=ALGORITHM))
 
 
 def decode_access_token(token: str) -> str:

@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
@@ -13,7 +14,7 @@ class LeadCreate(BaseModel):
     status: str = "New"
     lead_source: str | None = None
     industry: str | None = None
-    custom_fields: dict = {}
+    custom_fields: dict[str, Any] = {}
 
 
 class LeadUpdate(BaseModel):
@@ -26,7 +27,7 @@ class LeadUpdate(BaseModel):
     status: str | None = None
     lead_source: str | None = None
     industry: str | None = None
-    custom_fields: dict | None = None
+    custom_fields: dict[str, Any] | None = None
 
 
 class LeadRead(BaseModel):
@@ -45,7 +46,7 @@ class LeadRead(BaseModel):
     converted_at: datetime | None
     converted_account_id: int | None
     converted_contact_id: int | None
-    custom_fields: dict
+    custom_fields: dict[str, Any]
     owner_id: int | None
     created_by_id: int | None
     updated_by_id: int | None

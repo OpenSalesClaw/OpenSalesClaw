@@ -27,9 +27,10 @@ from app.core.database import get_db
 from app.main import app
 from app.models.base import Base
 
-TEST_DATABASE_URL = os.getenv(
-    "TEST_DATABASE_URL",
-    "postgresql+asyncpg://postgres:postgres@localhost:5432/opensalesclaw_test",
+TEST_DATABASE_URL = (
+    os.getenv("TEST_DATABASE_URL")
+    or os.getenv("DATABASE_URL")
+    or "postgresql+asyncpg://postgres:postgres@localhost:5432/opensalesclaw_test"
 )
 
 

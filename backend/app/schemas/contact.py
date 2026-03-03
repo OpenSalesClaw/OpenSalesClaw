@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
@@ -17,7 +18,7 @@ class ContactCreate(BaseModel):
     mailing_state: str | None = None
     mailing_postal_code: str | None = None
     mailing_country: str | None = None
-    custom_fields: dict = {}
+    custom_fields: dict[str, Any] = {}
 
 
 class ContactUpdate(BaseModel):
@@ -34,7 +35,7 @@ class ContactUpdate(BaseModel):
     mailing_state: str | None = None
     mailing_postal_code: str | None = None
     mailing_country: str | None = None
-    custom_fields: dict | None = None
+    custom_fields: dict[str, Any] | None = None
 
 
 class ContactRead(BaseModel):
@@ -54,7 +55,7 @@ class ContactRead(BaseModel):
     mailing_state: str | None
     mailing_postal_code: str | None
     mailing_country: str | None
-    custom_fields: dict
+    custom_fields: dict[str, Any]
     owner_id: int | None
     created_by_id: int | None
     updated_by_id: int | None

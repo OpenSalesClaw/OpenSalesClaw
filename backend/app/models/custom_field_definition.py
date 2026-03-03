@@ -1,3 +1,5 @@
+from typing import Any
+
 from sqlalchemy import Boolean, Integer, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
@@ -18,6 +20,6 @@ class CustomFieldDefinition(StandardColumns, Base):
     field_type: Mapped[str] = mapped_column(String(50), nullable=False)
     is_required: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
     default_value: Mapped[str | None] = mapped_column(Text, nullable=True)
-    picklist_values: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    picklist_values: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
     field_order: Mapped[int | None] = mapped_column(Integer, nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)

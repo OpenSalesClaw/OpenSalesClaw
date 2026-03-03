@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 
 from sqlalchemy import BigInteger, Boolean, ForeignKey, MetaData, Text
 from sqlalchemy.dialects.postgresql import JSONB, TIMESTAMP
@@ -25,7 +26,7 @@ class StandardColumns:
 
     sfid: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    custom_fields: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict, server_default="{}")
+    custom_fields: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict, server_default="{}")
 
     owner_id: Mapped[int | None] = mapped_column(BigInteger, ForeignKey("users.id", use_alter=True), nullable=True)
     created_by_id: Mapped[int | None] = mapped_column(BigInteger, ForeignKey("users.id", use_alter=True), nullable=True)

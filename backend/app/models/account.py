@@ -1,9 +1,13 @@
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from sqlalchemy import BigInteger, Integer, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, StandardColumns
+
+if TYPE_CHECKING:
+    from app.models.contact import Contact
 
 
 class Account(StandardColumns, Base):
