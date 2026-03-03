@@ -1,6 +1,6 @@
 # Technical Foundations Plan
 
-**Status:** Phase 5 Complete
+**Status:** Phase 6 Complete
 **Created:** 2026-03-03
 
 ---
@@ -178,20 +178,20 @@ For each entity, follow the pattern: **Model → Schemas → Service → Routes*
 
 ### Phase 6 — Testing Infrastructure
 
-- [ ] **6.1** `backend/tests/conftest.py` — fixtures for:
+- [x] **6.1** `backend/tests/conftest.py` — fixtures for:
   - Async test client (`httpx.AsyncClient`)
   - Test database (separate DB or transactional rollback)
   - Authenticated user fixture (pre-creates user, returns headers with valid JWT)
 
-- [ ] **6.2** `backend/tests/api/test_auth.py` — test register, login, me, invalid credentials.
+- [x] **6.2** `backend/tests/api/test_auth.py` — test register, login, me, invalid credentials.
 
-- [ ] **6.3** `backend/tests/api/test_accounts.py` — test list (empty), create, get by ID, update, soft delete, 404 on deleted, pagination.
+- [x] **6.3** `backend/tests/api/test_accounts.py` — test list (empty), create, get by ID, update, soft delete, 404 on deleted, pagination.
 
-- [ ] **6.4** `backend/tests/api/test_contacts.py` — same patterns + account relationship.
+- [x] **6.4** `backend/tests/api/test_contacts.py` — same patterns + account relationship.
 
-- [ ] **6.5** `backend/tests/api/test_leads.py` — same patterns + status filtering.
+- [x] **6.5** `backend/tests/api/test_leads.py` — same patterns + status filtering.
 
-- [ ] **6.6** `backend/tests/services/test_user.py` — unit tests for user service (create, authenticate, duplicate email).
+- [x] **6.6** `backend/tests/services/test_user.py` — unit tests for user service (create, authenticate, duplicate email).
 
 ---
 
