@@ -1,6 +1,6 @@
 # Technical Foundations Plan
 
-**Status:** Not Started
+**Status:** Phase 1 Complete
 **Created:** 2026-03-03
 
 ---
@@ -31,7 +31,7 @@ Stand up the full-stack skeleton: PostgreSQL schema with 5 core tables (users, a
 
 ### Phase 1 — Project Scaffolding & Configuration
 
-- [ ] **1.1** Create the full directory tree:
+- [x] **1.1** Create the full directory tree:
   - `backend/app/{api,models,schemas,services,core}/` with `__init__.py` files
   - `backend/alembic/`
   - `backend/tests/{api,services}/`
@@ -40,15 +40,15 @@ Stand up the full-stack skeleton: PostgreSQL schema with 5 core tables (users, a
   - `design/`
   - `entities/`
 
-- [ ] **1.2** Create `backend/pyproject.toml` with `uv` as package manager
+- [x] **1.2** Create `backend/pyproject.toml` with `uv` as package manager
   - Dependencies: `fastapi`, `uvicorn[standard]`, `sqlalchemy[asyncio]`, `asyncpg`, `alembic`, `pydantic[email]`, `pydantic-settings`, `python-jose[cryptography]`, `passlib[bcrypt]`, `python-multipart`, `httpx`
   - Dev dependencies: `pytest`, `pytest-asyncio`, `pytest-cov`, `ruff`, `mypy`
 
-- [ ] **1.3** Initialize `frontend/` via Vite + React + TypeScript scaffold
+- [x] **1.3** Initialize `frontend/` via Vite + React + TypeScript scaffold
   - Dependencies: `react`, `react-dom`, `react-router-dom`, `zustand`, `axios`
   - Dev dependencies: `typescript`, `@types/react`, `@types/react-dom`, `vite`, `@vitejs/plugin-react`, `eslint`, `prettier`
 
-- [ ] **1.4** Create `.env.example` with all expected environment variables:
+- [x] **1.4** Create `.env.example` with all expected environment variables:
   - `DATABASE_URL`, `SECRET_KEY`, `ACCESS_TOKEN_EXPIRE_MINUTES`, `CORS_ORIGINS`
   - `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`
 

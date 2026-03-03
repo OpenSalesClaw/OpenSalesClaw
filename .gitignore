@@ -205,3 +205,11 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Node / Frontend
+node_modules/
+frontend/dist/
+frontend/.env.local
+
+# uv lockfile (kept in VCS per convention — comment out to exclude)
+# uv.lock
