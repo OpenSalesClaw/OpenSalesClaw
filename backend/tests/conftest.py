@@ -12,6 +12,10 @@ Strategy:
   in-flight, not-yet-committed test data).
 """
 
+# ---------------------------------------------------------------------------
+# Test database URL — override via env var TEST_DATABASE_URL if needed.
+# ---------------------------------------------------------------------------
+import os
 from collections.abc import AsyncGenerator
 
 import pytest
@@ -22,11 +26,6 @@ import app.models  # noqa: F401 – ensure all models are registered on Base.met
 from app.core.database import get_db
 from app.main import app
 from app.models.base import Base
-
-# ---------------------------------------------------------------------------
-# Test database URL — override via env var TEST_DATABASE_URL if needed.
-# ---------------------------------------------------------------------------
-import os
 
 TEST_DATABASE_URL = os.getenv(
     "TEST_DATABASE_URL",

@@ -8,9 +8,7 @@ class Contact(StandardColumns, Base):
     __tablename__ = "contacts"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    account_id: Mapped[int | None] = mapped_column(
-        BigInteger, ForeignKey("accounts.id"), nullable=True, index=True
-    )
+    account_id: Mapped[int | None] = mapped_column(BigInteger, ForeignKey("accounts.id"), nullable=True, index=True)
     first_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
     last_name: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     email: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)

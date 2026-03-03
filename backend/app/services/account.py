@@ -10,9 +10,7 @@ from app.schemas.account import AccountCreate, AccountUpdate
 
 
 async def get_account_by_id(db: AsyncSession, account_id: int) -> Account:
-    result = await db.execute(
-        select(Account).where(Account.id == account_id, Account.is_deleted.is_(False))
-    )
+    result = await db.execute(select(Account).where(Account.id == account_id, Account.is_deleted.is_(False)))
     account = result.scalars().first()
     if account is None:
         raise NotFoundError(f"Account {account_id} not found.")

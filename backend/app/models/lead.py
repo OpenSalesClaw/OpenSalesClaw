@@ -18,9 +18,7 @@ class Lead(StandardColumns, Base):
     company: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     title: Mapped[str | None] = mapped_column(String(128), nullable=True)
     # Picklist: New, Contacted, Qualified, Unqualified, Converted
-    status: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="New", server_default="New", index=True
-    )
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="New", server_default="New", index=True)
     lead_source: Mapped[str | None] = mapped_column(String(100), nullable=True)
     industry: Mapped[str | None] = mapped_column(String(100), nullable=True)
 

@@ -10,9 +10,7 @@ from app.schemas.contact import ContactCreate, ContactUpdate
 
 
 async def get_contact_by_id(db: AsyncSession, contact_id: int) -> Contact:
-    result = await db.execute(
-        select(Contact).where(Contact.id == contact_id, Contact.is_deleted.is_(False))
-    )
+    result = await db.execute(select(Contact).where(Contact.id == contact_id, Contact.is_deleted.is_(False)))
     contact = result.scalars().first()
     if contact is None:
         raise NotFoundError(f"Contact {contact_id} not found.")

@@ -12,7 +12,6 @@ from app.core.exceptions import ConflictError, NotFoundError
 from app.schemas.user import UserCreate, UserUpdate
 from app.services import user as user_service
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

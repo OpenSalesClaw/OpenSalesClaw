@@ -5,9 +5,7 @@ create (with and without account link), get by ID, update, soft delete,
 and auth requirement.
 """
 
-import pytest
 from httpx import AsyncClient
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -159,18 +157,14 @@ async def test_get_contact_not_found(client: AsyncClient, auth_headers: dict[str
 
 async def test_update_contact(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     contact = await _create_contact(client, auth_headers, last_name="Before")
-    resp = await client.patch(
-        f"/api/contacts/{contact['id']}", json={"last_name": "After"}, headers=auth_headers
-    )
+    resp = await client.patch(f"/api/contacts/{contact['id']}", json={"last_name": "After"}, headers=auth_headers)
     assert resp.status_code == 200
     assert resp.json()["last_name"] == "After"
 
 
 async def test_update_contact_partial_preserves_fields(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     contact = await _create_contact(client, auth_headers, last_name="Preserve", email="keep@example.com")
-    resp = await client.patch(
-        f"/api/contacts/{contact['id']}", json={"title": "Manager"}, headers=auth_headers
-    )
+    resp = await client.patch(f"/api/contacts/{contact['id']}", json={"title": "Manager"}, headers=auth_headers)
     data = resp.json()
     assert data["email"] == "keep@example.com"  # unchanged
     assert data["title"] == "Manager"

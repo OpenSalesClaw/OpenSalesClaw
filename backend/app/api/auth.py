@@ -34,6 +34,7 @@ async def login(
         user = await user_service.authenticate_user(db, form_data.username, form_data.password)
     except NotFoundError:
         from fastapi import HTTPException
+
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",

@@ -54,7 +54,9 @@ async def test_ensure_default_user_idempotent(db: AsyncSession, monkeypatch: pyt
     assert first.id == second.id
 
     result = await db.execute(
-        select(func.count()).select_from(User).where(
+        select(func.count())
+        .select_from(User)
+        .where(
             User.email == "seed_admin_idempotent@example.com",
             User.is_deleted.is_(False),
         )
@@ -78,9 +80,7 @@ async def test_seed_demo_data_skipped_when_disabled(db: AsyncSession, monkeypatc
     admin = await ensure_default_user(db)
     await seed_demo_data(db, admin)
 
-    result = await db.execute(
-        select(func.count()).select_from(Account).where(Account.is_deleted.is_(False))
-    )
+    result = await db.execute(select(func.count()).select_from(Account).where(Account.is_deleted.is_(False)))
     assert result.scalar_one() == 0
 
 
@@ -126,9 +126,7 @@ async def test_seed_demo_data_sets_audit_columns(db: AsyncSession, monkeypatch: 
     admin = await ensure_default_user(db)
     await seed_demo_data(db, admin)
 
-    result = await db.execute(
-        select(Account).where(Account.name == _SENTINEL_ACCOUNT, Account.is_deleted.is_(False))
-    )
+    result = await db.execute(select(Account).where(Account.name == _SENTINEL_ACCOUNT, Account.is_deleted.is_(False)))
     sentinel = result.scalars().first()
     assert sentinel is not None
     assert sentinel.owner_id == admin.id
@@ -167,7 +165,9 @@ async def test_seed_demo_data_contacts_linked_to_accounts(db: AsyncSession, monk
 
     # Every contact in our demo data is linked to a known account
     result = await db.execute(
-        select(func.count()).select_from(Contact).where(
+        select(func.count())
+        .select_from(Contact)
+        .where(
             Contact.account_id.is_(None),
             Contact.is_deleted.is_(False),
         )

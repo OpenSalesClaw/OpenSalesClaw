@@ -4,9 +4,7 @@ Covers: list (empty + paginated + filtered), create, get by ID, update,
 soft delete, 404 on deleted/missing, and auth requirement.
 """
 
-import pytest
 from httpx import AsyncClient
-
 
 # ---------------------------------------------------------------------------
 # Helper
@@ -147,18 +145,14 @@ async def test_get_account_not_found(client: AsyncClient, auth_headers: dict[str
 
 async def test_update_account_name(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     account = await _create_account(client, auth_headers, name="Old Name")
-    resp = await client.patch(
-        f"/api/accounts/{account['id']}", json={"name": "New Name"}, headers=auth_headers
-    )
+    resp = await client.patch(f"/api/accounts/{account['id']}", json={"name": "New Name"}, headers=auth_headers)
     assert resp.status_code == 200
     assert resp.json()["name"] == "New Name"
 
 
 async def test_update_account_partial(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     account = await _create_account(client, auth_headers, name="Partial Update", type="Customer")
-    resp = await client.patch(
-        f"/api/accounts/{account['id']}", json={"industry": "Finance"}, headers=auth_headers
-    )
+    resp = await client.patch(f"/api/accounts/{account['id']}", json={"industry": "Finance"}, headers=auth_headers)
     assert resp.status_code == 200
     data = resp.json()
     assert data["name"] == "Partial Update"  # unchanged

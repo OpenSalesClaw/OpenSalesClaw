@@ -8,9 +8,7 @@ from app.schemas.user import UserCreate, UserUpdate
 
 
 async def get_user_by_id(db: AsyncSession, user_id: int) -> User:
-    result = await db.execute(
-        select(User).where(User.id == user_id, User.is_deleted.is_(False))
-    )
+    result = await db.execute(select(User).where(User.id == user_id, User.is_deleted.is_(False)))
     user = result.scalars().first()
     if user is None:
         raise NotFoundError(f"User {user_id} not found.")
@@ -18,9 +16,7 @@ async def get_user_by_id(db: AsyncSession, user_id: int) -> User:
 
 
 async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
-    result = await db.execute(
-        select(User).where(User.email == email, User.is_deleted.is_(False))
-    )
+    result = await db.execute(select(User).where(User.email == email, User.is_deleted.is_(False)))
     return result.scalars().first()
 
 

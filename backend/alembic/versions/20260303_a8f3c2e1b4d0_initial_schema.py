@@ -5,17 +5,19 @@ Revises:
 Create Date: 2026-03-03 00:00:00.000000+00:00
 
 """
-from typing import Sequence, Union
+
+from collections.abc import Sequence
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "a8f3c2e1b4d0"
-down_revision: Union[str, None] = None
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = None
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -78,7 +80,9 @@ def upgrade() -> None:
     op.create_index("idx_users_email", "users", ["email"])
     op.create_index("idx_users_owner_id", "users", ["owner_id"])
     op.create_index(
-        "idx_users_custom_fields", "users", [sa.text("custom_fields")],
+        "idx_users_custom_fields",
+        "users",
+        [sa.text("custom_fields")],
         postgresql_using="gin",
     )
 
@@ -133,7 +137,9 @@ def upgrade() -> None:
     op.create_index("idx_accounts_name", "accounts", ["name"])
     op.create_index("idx_accounts_owner_id", "accounts", ["owner_id"])
     op.create_index(
-        "idx_accounts_custom_fields", "accounts", [sa.text("custom_fields")],
+        "idx_accounts_custom_fields",
+        "accounts",
+        [sa.text("custom_fields")],
         postgresql_using="gin",
     )
 
@@ -190,7 +196,9 @@ def upgrade() -> None:
     op.create_index("idx_contacts_last_name", "contacts", ["last_name"])
     op.create_index("idx_contacts_owner_id", "contacts", ["owner_id"])
     op.create_index(
-        "idx_contacts_custom_fields", "contacts", [sa.text("custom_fields")],
+        "idx_contacts_custom_fields",
+        "contacts",
+        [sa.text("custom_fields")],
         postgresql_using="gin",
     )
 
@@ -219,12 +227,8 @@ def upgrade() -> None:
         sa.Column("lead_source", sa.String(100), nullable=True),
         sa.Column("industry", sa.String(100), nullable=True),
         sa.Column("converted_at", sa.TIMESTAMP(timezone=True), nullable=True),
-        sa.Column(
-            "converted_account_id", sa.BigInteger(), sa.ForeignKey("accounts.id"), nullable=True
-        ),
-        sa.Column(
-            "converted_contact_id", sa.BigInteger(), sa.ForeignKey("contacts.id"), nullable=True
-        ),
+        sa.Column("converted_account_id", sa.BigInteger(), sa.ForeignKey("accounts.id"), nullable=True),
+        sa.Column("converted_contact_id", sa.BigInteger(), sa.ForeignKey("contacts.id"), nullable=True),
         sa.Column("custom_fields", postgresql.JSONB(), nullable=False, server_default="{}"),
         sa.Column("owner_id", sa.BigInteger(), sa.ForeignKey("users.id"), nullable=True),
         sa.Column("created_by_id", sa.BigInteger(), sa.ForeignKey("users.id"), nullable=True),
@@ -250,7 +254,9 @@ def upgrade() -> None:
     op.create_index("idx_leads_company", "leads", ["company"])
     op.create_index("idx_leads_owner_id", "leads", ["owner_id"])
     op.create_index(
-        "idx_leads_custom_fields", "leads", [sa.text("custom_fields")],
+        "idx_leads_custom_fields",
+        "leads",
+        [sa.text("custom_fields")],
         postgresql_using="gin",
     )
 
@@ -297,16 +303,10 @@ def upgrade() -> None:
         sa.Column("is_deleted", sa.Boolean(), nullable=False, server_default="false"),
         sa.Column("deleted_at", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.Column("deleted_by_id", sa.BigInteger(), sa.ForeignKey("users.id"), nullable=True),
-        sa.UniqueConstraint(
-            "object_name", "field_name", name="uq_custom_field_definitions_object_field"
-        ),
+        sa.UniqueConstraint("object_name", "field_name", name="uq_custom_field_definitions_object_field"),
     )
-    op.create_index(
-        "idx_custom_field_definitions_object_name", "custom_field_definitions", ["object_name"]
-    )
-    op.create_index(
-        "idx_custom_field_definitions_owner_id", "custom_field_definitions", ["owner_id"]
-    )
+    op.create_index("idx_custom_field_definitions_object_name", "custom_field_definitions", ["object_name"])
+    op.create_index("idx_custom_field_definitions_owner_id", "custom_field_definitions", ["owner_id"])
     op.create_index(
         "idx_custom_field_definitions_custom_fields",
         "custom_field_definitions",

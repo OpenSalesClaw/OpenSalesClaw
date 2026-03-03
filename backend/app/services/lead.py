@@ -10,9 +10,7 @@ from app.schemas.lead import LeadCreate, LeadUpdate
 
 
 async def get_lead_by_id(db: AsyncSession, lead_id: int) -> Lead:
-    result = await db.execute(
-        select(Lead).where(Lead.id == lead_id, Lead.is_deleted.is_(False))
-    )
+    result = await db.execute(select(Lead).where(Lead.id == lead_id, Lead.is_deleted.is_(False)))
     lead = result.scalars().first()
     if lead is None:
         raise NotFoundError(f"Lead {lead_id} not found.")
@@ -55,9 +53,7 @@ async def create_lead(db: AsyncSession, data: LeadCreate, created_by_id: int | N
     return lead
 
 
-async def update_lead(
-    db: AsyncSession, lead_id: int, data: LeadUpdate, updated_by_id: int | None = None
-) -> Lead:
+async def update_lead(db: AsyncSession, lead_id: int, data: LeadUpdate, updated_by_id: int | None = None) -> Lead:
     lead = await get_lead_by_id(db, lead_id)
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(lead, field, value)

@@ -1,14 +1,14 @@
 import asyncio
 from logging.config import fileConfig
 
-from alembic import context
 from sqlalchemy.ext.asyncio import async_engine_from_config
 from sqlalchemy.pool import NullPool
 
 # Import Base and all models so that Base.metadata reflects every table.
 import app.models  # noqa: F401 — registers all ORM models
-from app.models.base import Base
+from alembic import context
 from app.core.config import settings
+from app.models.base import Base
 
 # Alembic Config object — provides access to values in alembic.ini
 config = context.config
@@ -28,6 +28,7 @@ target_metadata = Base.metadata
 # ---------------------------------------------------------------------------
 # Offline migration (generates SQL without connecting to the DB)
 # ---------------------------------------------------------------------------
+
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
@@ -52,6 +53,7 @@ def run_migrations_offline() -> None:
 # ---------------------------------------------------------------------------
 # Online migration (connects to the DB and applies migrations directly)
 # ---------------------------------------------------------------------------
+
 
 def do_run_migrations(connection):  # type: ignore[no-untyped-def]
     context.configure(

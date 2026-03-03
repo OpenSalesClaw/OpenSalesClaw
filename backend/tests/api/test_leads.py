@@ -4,9 +4,7 @@ Covers: list (empty + paginated + filtered by status/company/email),
 create, get by ID, update, soft delete, and auth requirement.
 """
 
-import pytest
 from httpx import AsyncClient
-
 
 # ---------------------------------------------------------------------------
 # Helper
@@ -155,18 +153,14 @@ async def test_get_lead_not_found(client: AsyncClient, auth_headers: dict[str, s
 
 async def test_update_lead_status(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     lead = await _create_lead(client, auth_headers, status="New")
-    resp = await client.patch(
-        f"/api/leads/{lead['id']}", json={"status": "Qualified"}, headers=auth_headers
-    )
+    resp = await client.patch(f"/api/leads/{lead['id']}", json={"status": "Qualified"}, headers=auth_headers)
     assert resp.status_code == 200
     assert resp.json()["status"] == "Qualified"
 
 
 async def test_update_lead_partial_preserves_fields(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     lead = await _create_lead(client, auth_headers, last_name="Preserve", company="KeepMe", status="New")
-    resp = await client.patch(
-        f"/api/leads/{lead['id']}", json={"industry": "Retail"}, headers=auth_headers
-    )
+    resp = await client.patch(f"/api/leads/{lead['id']}", json={"industry": "Retail"}, headers=auth_headers)
     data = resp.json()
     assert data["company"] == "KeepMe"
     assert data["status"] == "New"

@@ -7,9 +7,7 @@ from app.models.base import Base, StandardColumns
 
 class CustomFieldDefinition(StandardColumns, Base):
     __tablename__ = "custom_field_definitions"
-    __table_args__ = (
-        UniqueConstraint("object_name", "field_name", name="uq_custom_field_definitions_object_field"),
-    )
+    __table_args__ = (UniqueConstraint("object_name", "field_name", name="uq_custom_field_definitions_object_field"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     # e.g. 'accounts', 'contacts'
