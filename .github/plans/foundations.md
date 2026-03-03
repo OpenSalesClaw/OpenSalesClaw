@@ -107,29 +107,29 @@ Stand up the full-stack skeleton: PostgreSQL schema with 5 core tables (users, a
 
 ### Phase 3 — Backend Core
 
-- [ ] **3.1** `backend/app/core/config.py` — `Settings` class using `pydantic-settings` `BaseSettings`:
+- [x] **3.1** `backend/app/core/config.py` — `Settings` class using `pydantic-settings` `BaseSettings`:
   - `database_url: str`
   - `secret_key: str`
   - `access_token_expire_minutes: int = 30`
   - `cors_origins: list[str]`
   - `app_name: str = "OpenSalesClaw"`
 
-- [ ] **3.2** `backend/app/core/database.py` — async SQLAlchemy engine (`create_async_engine`) + `async_sessionmaker`. Provide `async def get_db()` dependency yielding `AsyncSession`.
+- [x] **3.2** `backend/app/core/database.py` — async SQLAlchemy engine (`create_async_engine`) + `async_sessionmaker`. Provide `async def get_db()` dependency yielding `AsyncSession`.
 
-- [ ] **3.3** `backend/app/models/base.py` — `Base` declarative base + `StandardColumns` mixin providing all shared columns (`sfid`, `custom_fields`, `owner_id`, `created_by_id`, `updated_by_id`, `created_at`, `updated_at`, `is_deleted`, `deleted_at`, `deleted_by_id`). Every entity model inherits from both.
+- [x] **3.3** `backend/app/models/base.py` — `Base` declarative base + `StandardColumns` mixin providing all shared columns (`sfid`, `custom_fields`, `owner_id`, `created_by_id`, `updated_by_id`, `created_at`, `updated_at`, `is_deleted`, `deleted_at`, `deleted_by_id`). Every entity model inherits from both.
 
-- [ ] **3.4** `backend/app/core/security.py` — password hashing (passlib bcrypt), JWT token creation/verification (python-jose):
+- [x] **3.4** `backend/app/core/security.py` — password hashing (passlib bcrypt), JWT token creation/verification (python-jose):
   - `create_access_token(subject: str) → str`
   - `verify_password(plain, hashed) → bool`
   - `hash_password(plain) → str`
 
-- [ ] **3.5** `backend/app/core/dependencies.py`:
+- [x] **3.5** `backend/app/core/dependencies.py`:
   - `get_current_user` — extract JWT from `Authorization: Bearer`, decode, fetch user, raise 401 if invalid
   - `get_current_active_user` — also check `is_active`
 
-- [ ] **3.6** `backend/app/core/exceptions.py` — domain exceptions: `NotFoundError`, `ForbiddenError`, `ConflictError`, `ValidationError`. Register FastAPI exception handlers via `register_exception_handlers(app)`.
+- [x] **3.6** `backend/app/core/exceptions.py` — domain exceptions: `NotFoundError`, `ForbiddenError`, `ConflictError`, `ValidationError`. Register FastAPI exception handlers via `register_exception_handlers(app)`.
 
-- [ ] **3.7** `backend/app/core/pagination.py`:
+- [x] **3.7** `backend/app/core/pagination.py`:
   - `PaginationParams` dependency (offset/limit, defaults 0/20, max 200)
   - `PaginatedResponse[T]` generic schema: `items: list[T]`, `total: int`, `offset: int`, `limit: int`
 
