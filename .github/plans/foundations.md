@@ -1,6 +1,6 @@
 # Technical Foundations Plan
 
-**Status:** Phase 2 Complete
+**Status:** Phase 4 Complete
 **Created:** 2026-03-03
 
 ---
@@ -139,28 +139,28 @@ Stand up the full-stack skeleton: PostgreSQL schema with 5 core tables (users, a
 
 For each entity, follow the pattern: **Model → Schemas → Service → Routes**.
 
-- [ ] **4.1** **Users**
+- [x] **4.1** **Users**
   - Model: `backend/app/models/user.py` — `email`, `hashed_password`, `first_name`, `last_name`, `is_active`, `is_superuser` + standard columns
   - Schemas: `backend/app/schemas/user.py` — `UserCreate` (email, password, first_name, last_name), `UserUpdate`, `UserRead` (excludes hashed_password)
   - Service: `backend/app/services/user.py` — `create_user()`, `get_user_by_email()`, `get_user_by_id()`, `authenticate_user()`
   - Routes: `backend/app/api/auth.py` — `POST /api/auth/register`, `POST /api/auth/login` (returns JWT), `GET /api/auth/me`
 
-- [ ] **4.2** **Accounts**
+- [x] **4.2** **Accounts**
   - Model, Schemas, Service, Routes in respective directories
   - Full CRUD: `GET /api/accounts` (paginated; filters: name, type, industry), `GET /api/accounts/{id}`, `POST /api/accounts`, `PATCH /api/accounts/{id}`, `DELETE /api/accounts/{id}` (soft delete)
   - Relationship: `contacts` (one-to-many)
 
-- [ ] **4.3** **Contacts**
+- [x] **4.3** **Contacts**
   - Same CRUD pattern
   - Relationship: `account` (many-to-one)
   - Filters: `account_id`, `last_name`, `email`
 
-- [ ] **4.4** **Leads**
+- [x] **4.4** **Leads**
   - Same CRUD pattern
   - No FK relationships to other CRM entities (leads are standalone until converted)
   - Filters: `status`, `company`, `email`
 
-- [ ] **4.5** `backend/app/main.py` — FastAPI app instantiation:
+- [x] **4.5** `backend/app/main.py` — FastAPI app instantiation:
   - Include all routers
   - Register exception handlers
   - Add CORS middleware

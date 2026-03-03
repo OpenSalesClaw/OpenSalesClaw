@@ -1,0 +1,7 @@
+# Re-export all ORM models so that `Base.metadata` includes every table.
+# Import this module (or app.models) in alembic/env.py for autogenerate.
+from app.models.account import Account  # noqa: F401
+from app.models.base import Base  # noqa: F401
+from app.models.contact import Contact  # noqa: F401
+from app.models.lead import Lead  # noqa: F401
+from app.models.user import User  # noqa: F401
