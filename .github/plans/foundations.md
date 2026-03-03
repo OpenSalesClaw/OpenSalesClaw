@@ -1,6 +1,6 @@
 # Technical Foundations Plan
 
-**Status:** Phase 7 Complete
+**Status:** Phase 8 Complete
 **Created:** 2026-03-03
 
 ---
@@ -225,23 +225,23 @@ For each entity, follow the pattern: **Model → Schemas → Service → Routes*
 
 ### Phase 8 — Docker & Local Development
 
-- [ ] **8.1** `backend/Dockerfile` — multi-stage build:
+- [x] **8.1** `backend/Dockerfile` — multi-stage build:
   - Builder: `uv sync` dependencies
   - Runtime: copy app, run `uvicorn app.main:app`
   - Expose port 8000
 
-- [ ] **8.2** `frontend/Dockerfile` — multi-stage build:
+- [x] **8.2** `frontend/Dockerfile` — multi-stage build:
   - Builder: `npm install` + `npm run build`
   - Runtime: serve with nginx
   - Expose port 80
 
-- [ ] **8.3** `docker-compose.yml` — 4 services:
+- [x] **8.3** `docker-compose.yml` — 4 services:
   - **db**: `postgres:16-alpine`, data volume, health check
   - **backend**: builds from `backend/`, depends on `db`, environment from `.env`, port 8000
   - **frontend**: builds from `frontend/`, port 3000
   - **traefik**: `traefik:v3`, dashboard enabled for dev, routes `/api/*` → backend, `/*` → frontend
 
-- [ ] **8.4** `docker-compose.override.yml` — dev overrides:
+- [x] **8.4** `docker-compose.override.yml` — dev overrides:
   - Mount source as volumes
   - `uvicorn --reload` for backend
   - `npm run dev` for frontend

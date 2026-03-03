@@ -1,0 +1,53 @@
+# Development overrides — applied automatically by Docker Compose.
+# Mounts source code as volumes, enables hot-reload, and exposes the database port.
+
+services:
+  # ---------------------------------------------------------------------------
+  # Database: expose port for direct access (e.g., psql, TablePlus)
+  # ---------------------------------------------------------------------------
+  db:
+    ports:
+      - "5432:5432"
+
+  # ---------------------------------------------------------------------------
+  # Backend: mount source + enable uvicorn --reload
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend/app:/app/app
+      - ./backend/alembic:/app/alembic
+      - ./backend/alembic.ini:/app/alembic.ini
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-crm_user}:${POSTGRES_PASSWORD:-crm_password}@db:5432/${POSTGRES_DB:-opensalesclaw}
+      SECRET_KEY: ${SECRET_KEY:-change-me-to-a-long-random-secret-key}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:5173}
+    ports:
+      - "8000:8000"
+
+  # ---------------------------------------------------------------------------
+  # Frontend: mount source + run Vite dev server instead of nginx
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/vite.config.ts:/app/vite.config.ts
+    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]
+    environment:
+      VITE_API_BASE_URL: http://localhost/api
+    ports:
+      - "3000:3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.routers.frontend.priority=1"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"

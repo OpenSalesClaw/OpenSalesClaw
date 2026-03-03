@@ -1,0 +1,92 @@
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL database
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-crm_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-crm_password}
+      POSTGRES_DB: ${POSTGRES_DB:-opensalesclaw}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-crm_user} -d ${POSTGRES_DB:-opensalesclaw}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - internal
+
+  # ---------------------------------------------------------------------------
+  # FastAPI backend
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-crm_user}:${POSTGRES_PASSWORD:-crm_password}@db:5432/${POSTGRES_DB:-opensalesclaw}
+      SECRET_KEY: ${SECRET_KEY:-change-me-to-a-long-random-secret-key}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.services.backend.loadbalancer.server.port=8000"
+    networks:
+      - internal
+
+  # ---------------------------------------------------------------------------
+  # React frontend (nginx)
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.routers.frontend.priority=1"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+    networks:
+      - internal
+
+  # ---------------------------------------------------------------------------
+  # Traefik reverse proxy
+  # ---------------------------------------------------------------------------
+  traefik:
+    image: traefik:v3
+    restart: unless-stopped
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.traefik.address=:8080"
+    ports:
+      - "80:80"
+      - "8080:8080"   # Traefik dashboard
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - internal
+
+# ---------------------------------------------------------------------------
+# Volumes & Networks
+# ---------------------------------------------------------------------------
+volumes:
+  postgres_data:
+
+networks:
+  internal:
+    driver: bridge
