@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { accountsApi } from '@/api/accounts'
 import { opportunitiesApi } from '@/api/opportunities'
-import type { Opportunity, OpportunityUpdate } from '@/api/types'
+import type { Account, Opportunity, OpportunityUpdate } from '@/api/types'
 import DeleteConfirmDialog from '@/components/DeleteConfirmDialog'
 import DetailView, { type FieldDefinition } from '@/components/DetailView'
 import RecordForm from '@/components/RecordForm'
@@ -13,40 +14,6 @@ const STAGES = [
   'Prospecting', 'Qualification', 'Needs Analysis', 'Value Proposition',
   'Id. Decision Makers', 'Perception Analysis', 'Proposal/Price Quote',
   'Negotiation/Review', 'Closed Won', 'Closed Lost',
-]
-
-const DETAIL_FIELDS: FieldDefinition[] = [
-  { key: 'name', label: 'Name' },
-  { key: 'account_id', label: 'Account ID' },
-  { key: 'contact_id', label: 'Contact ID' },
-  { key: 'stage', label: 'Stage' },
-  {
-    key: 'amount',
-    label: 'Amount',
-    format: (v) =>
-      v != null
-        ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(v))
-        : '—',
-  },
-  { key: 'probability', label: 'Probability (%)', format: (v) => (v != null ? `${String(v)}%` : '—') },
-  { key: 'close_date', label: 'Close Date' },
-  { key: 'lead_source', label: 'Lead Source' },
-  { key: 'next_step', label: 'Next Step' },
-  { key: 'description', label: 'Description' },
-  { key: 'is_won', label: 'Won' },
-  { key: 'is_closed', label: 'Closed' },
-  { key: 'created_at', label: 'Created At' },
-]
-
-const FORM_FIELDS = [
-  { key: 'name', label: 'Name', required: true },
-  { key: 'close_date', label: 'Close Date', required: true, type: 'date' as const },
-  { key: 'stage', label: 'Stage', type: 'select' as const, options: STAGES.map((s) => ({ value: s, label: s })) },
-  { key: 'amount', label: 'Amount', type: 'number' as const },
-  { key: 'probability', label: 'Probability (%)', type: 'number' as const },
-  { key: 'account_id', label: 'Account ID', type: 'number' as const },
-  { key: 'next_step', label: 'Next Step' },
-  { key: 'description', label: 'Description', type: 'textarea' as const },
 ]
 
 export default function OpportunityDetailPage() {
@@ -61,6 +28,58 @@ export default function OpportunityDetailPage() {
   const [saveError, setSaveError] = useState<string | null>(null)
   const [showDelete, setShowDelete] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [accounts, setAccounts] = useState<Account[]>([])
+
+  useEffect(() => {
+    void accountsApi.list({ limit: 200 }).then((res) => setAccounts(res.items))
+  }, [])
+
+  const accountMap = useMemo(() => new Map(accounts.map((a) => [a.id, a.name])), [accounts])
+  const accountOptions = useMemo(() => accounts.map((a) => ({ value: String(a.id), label: a.name })), [accounts])
+
+  const detailFields = useMemo<FieldDefinition[]>(
+    () => [
+      { key: 'name', label: 'Name' },
+      {
+        key: 'account_id',
+        label: 'Account',
+        format: (v) => (v != null ? (accountMap.get(Number(v)) ?? String(v)) : '—'),
+      },
+      { key: 'contact_id', label: 'Contact ID' },
+      { key: 'stage', label: 'Stage' },
+      {
+        key: 'amount',
+        label: 'Amount',
+        format: (v) =>
+          v != null
+            ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(v))
+            : '—',
+      },
+      { key: 'probability', label: 'Probability (%)', format: (v) => (v != null ? `${String(v)}%` : '—') },
+      { key: 'close_date', label: 'Close Date' },
+      { key: 'lead_source', label: 'Lead Source' },
+      { key: 'next_step', label: 'Next Step' },
+      { key: 'description', label: 'Description' },
+      { key: 'is_won', label: 'Won' },
+      { key: 'is_closed', label: 'Closed' },
+      { key: 'created_at', label: 'Created At' },
+    ],
+    [accountMap],
+  )
+
+  const formFields = useMemo(
+    () => [
+      { key: 'name', label: 'Name', required: true },
+      { key: 'close_date', label: 'Close Date', required: true, type: 'date' as const },
+      { key: 'stage', label: 'Stage', type: 'select' as const, options: STAGES.map((s) => ({ value: s, label: s })) },
+      { key: 'amount', label: 'Amount', type: 'number' as const },
+      { key: 'probability', label: 'Probability (%)', type: 'number' as const },
+      { key: 'account_id', label: 'Account', type: 'combobox' as const, options: accountOptions, placeholder: 'Search accounts…' },
+      { key: 'next_step', label: 'Next Step' },
+      { key: 'description', label: 'Description', type: 'textarea' as const },
+    ],
+    [accountOptions],
+  )
 
   const load = useCallback(async () => {
     if (!id) return
@@ -80,7 +99,7 @@ export default function OpportunityDetailPage() {
   const startEdit = () => {
     if (!opp) return
     setFormValues(Object.fromEntries(
-      FORM_FIELDS.map((f) => [f.key, opp[f.key as keyof Opportunity] != null ? String(opp[f.key as keyof Opportunity]) : ''])
+      formFields.map((f) => [f.key, opp[f.key as keyof Opportunity] != null ? String(opp[f.key as keyof Opportunity]) : ''])
     ))
     setEditing(true)
   }
@@ -141,7 +160,7 @@ export default function OpportunityDetailPage() {
         <CardContent>
           {editing ? (
             <RecordForm
-              fields={FORM_FIELDS}
+              fields={formFields}
               values={formValues}
               onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
               onSubmit={handleSave}
@@ -151,7 +170,7 @@ export default function OpportunityDetailPage() {
               error={saveError}
             />
           ) : (
-            <DetailView record={opp as unknown as Record<string, unknown>} fields={DETAIL_FIELDS} />
+            <DetailView record={opp as unknown as Record<string, unknown>} fields={detailFields} />
           )}
         </CardContent>
       </Card>

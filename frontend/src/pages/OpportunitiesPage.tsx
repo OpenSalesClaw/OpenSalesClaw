@@ -1,6 +1,8 @@
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { accountsApi } from '@/api/accounts'
 import { opportunitiesApi } from '@/api/opportunities'
-import type { Opportunity, OpportunityCreate } from '@/api/types'
+import type { Account, Opportunity, OpportunityCreate } from '@/api/types'
 import DataTable, { type Column } from '@/components/DataTable'
 import FilterBar from '@/components/FilterBar'
 import RecordForm from '@/components/RecordForm'
@@ -35,27 +37,6 @@ function formatCurrency(value: number | null) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value)
 }
 
-const COLUMNS: Column<Opportunity>[] = [
-  { key: 'name', label: 'Name' },
-  { key: 'account_id', label: 'Account ID' },
-  {
-    key: 'stage',
-    label: 'Stage',
-    render: (r) => <Badge variant={stageVariant(r.stage)}>{r.stage}</Badge>,
-  },
-  { key: 'amount', label: 'Amount', render: (r) => formatCurrency(r.amount) },
-  { key: 'close_date', label: 'Close Date' },
-]
-
-const FORM_FIELDS = [
-  { key: 'name', label: 'Name', required: true, placeholder: 'Q3 Deal' },
-  { key: 'close_date', label: 'Close Date', required: true, type: 'date' as const },
-  { key: 'stage', label: 'Stage', type: 'select' as const, options: STAGES.map((s) => ({ value: s, label: s })) },
-  { key: 'amount', label: 'Amount', type: 'number' as const, placeholder: '50000' },
-  { key: 'account_id', label: 'Account ID', type: 'number' as const, placeholder: '1' },
-  { key: 'probability', label: 'Probability (%)', type: 'number' as const, placeholder: 'Auto from stage' },
-]
-
 function buildListParams(f: Record<string, string>) {
   return f.stage ? { stage: f.stage } : {}
 }
@@ -73,6 +54,52 @@ function buildCreatePayload(f: Record<string, string>): OpportunityCreate {
 
 export default function OpportunitiesPage() {
   const navigate = useNavigate()
+  const [accounts, setAccounts] = useState<Account[]>([])
+
+  useEffect(() => {
+    void accountsApi.list({ limit: 200 }).then((res) => setAccounts(res.items))
+  }, [])
+
+  const accountMap = useMemo(
+    () => new Map(accounts.map((a) => [a.id, a.name])),
+    [accounts],
+  )
+
+  const accountOptions = useMemo(
+    () => accounts.map((a) => ({ value: String(a.id), label: a.name })),
+    [accounts],
+  )
+
+  const columns = useMemo<Column<Opportunity>[]>(
+    () => [
+      { key: 'name', label: 'Name' },
+      {
+        key: 'account_id',
+        label: 'Account',
+        render: (r) => (r.account_id != null ? (accountMap.get(r.account_id) ?? String(r.account_id)) : '—'),
+      },
+      {
+        key: 'stage',
+        label: 'Stage',
+        render: (r) => <Badge variant={stageVariant(r.stage)}>{r.stage}</Badge>,
+      },
+      { key: 'amount', label: 'Amount', render: (r) => formatCurrency(r.amount) },
+      { key: 'close_date', label: 'Close Date' },
+    ],
+    [accountMap],
+  )
+
+  const formFields = useMemo(
+    () => [
+      { key: 'name', label: 'Name', required: true, placeholder: 'Q3 Deal' },
+      { key: 'close_date', label: 'Close Date', required: true, type: 'date' as const },
+      { key: 'stage', label: 'Stage', type: 'select' as const, options: STAGES.map((s) => ({ value: s, label: s })) },
+      { key: 'amount', label: 'Amount', type: 'number' as const, placeholder: '50000' },
+      { key: 'account_id', label: 'Account', type: 'combobox' as const, options: accountOptions, placeholder: 'Search accounts…' },
+      { key: 'probability', label: 'Probability (%)', type: 'number' as const, placeholder: 'Auto from stage' },
+    ],
+    [accountOptions],
+  )
   const crud = useEntityCRUD<Opportunity, OpportunityCreate>({
     api: opportunitiesApi,
     pageSize: PAGE_SIZE,
@@ -103,7 +130,7 @@ export default function OpportunitiesPage() {
       />
 
       <DataTable
-        columns={COLUMNS}
+        columns={columns}
         data={crud.items}
         loading={crud.loading}
         total={crud.total}
@@ -119,7 +146,7 @@ export default function OpportunitiesPage() {
             <DialogTitle>New Opportunity</DialogTitle>
           </DialogHeader>
           <RecordForm
-            fields={FORM_FIELDS}
+            fields={formFields}
             values={crud.formValues}
             onChange={crud.setFormValue}
             onSubmit={() => void crud.handleCreate()}
