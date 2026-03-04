@@ -6,7 +6,18 @@ from typing import Any
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import accounts, auth, cases, contacts, custom_field_definitions, leads, opportunities, roles, users
+from app.api import (
+    accounts,
+    auth,
+    cases,
+    contacts,
+    custom_field_definitions,
+    custom_objects,
+    leads,
+    opportunities,
+    roles,
+    users,
+)
 from app.core.config import settings
 from app.core.database import AsyncSessionLocal
 from app.core.exceptions import register_exception_handlers
@@ -55,6 +66,7 @@ _TAGS_METADATA: list[dict[str, Any]] = [
     {"name": "users", "description": "User administration (superuser only)."},
     {"name": "roles", "description": "Role management with hierarchical permissions."},
     {"name": "custom-field-definitions", "description": "Define custom fields on any object."},
+    {"name": "custom-objects", "description": "Manage user-defined custom objects and their records."},
     {"name": "health", "description": "Health-check endpoint."},
 ]
 
@@ -100,6 +112,7 @@ app.include_router(cases.router)
 app.include_router(users.router)
 app.include_router(roles.router)
 app.include_router(custom_field_definitions.router)
+app.include_router(custom_objects.router)
 
 
 # ---------------------------------------------------------------------------

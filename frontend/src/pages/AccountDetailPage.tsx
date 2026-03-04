@@ -8,6 +8,7 @@ import type { Account, AccountUpdate, Case, Contact, Opportunity } from '@/api/t
 import DataTable, { type Column } from '@/components/DataTable'
 import DeleteConfirmDialog from '@/components/DeleteConfirmDialog'
 import DetailView, { type FieldDefinition } from '@/components/DetailView'
+import DynamicFieldsSection from '@/components/DynamicFieldsSection'
 import RecordForm from '@/components/RecordForm'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -111,6 +112,7 @@ export default function AccountDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [editing, setEditing] = useState(false)
   const [formValues, setFormValues] = useState<Record<string, string>>({})
+  const [customFields, setCustomFields] = useState<Record<string, unknown>>({})
   const [saveLoading, setSaveLoading] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [showDelete, setShowDelete] = useState(false)
@@ -128,6 +130,7 @@ export default function AccountDetailPage() {
         casesApi.list({ account_id: numId, limit: 50 }),
       ])
       setAccount(acct)
+      setCustomFields(acct.custom_fields ?? {})
       setContacts(conts.items)
       setOpportunities(opps.items)
       setCases(css.items)
@@ -152,6 +155,7 @@ export default function AccountDetailPage() {
         ]),
       ),
     )
+    setCustomFields(account.custom_fields ?? {})
     setEditing(true)
   }
 
@@ -173,12 +177,15 @@ export default function AccountDetailPage() {
         billing_city: formValues.billing_city || null,
         billing_country: formValues.billing_country || null,
         description: formValues.description || null,
+        custom_fields: customFields,
       }
       const updated = await accountsApi.update(parseInt(id, 10), payload)
       setAccount(updated)
+      setCustomFields(updated.custom_fields ?? {})
       setEditing(false)
-    } catch {
-      setSaveError('Failed to save changes.')
+    } catch (err: unknown) {
+      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+      setSaveError(typeof detail === 'string' ? detail : 'Failed to save changes.')
     } finally {
       setSaveLoading(false)
     }
@@ -227,18 +234,33 @@ export default function AccountDetailPage() {
         </CardHeader>
         <CardContent>
           {editing ? (
-            <RecordForm
-              fields={EDIT_FIELDS}
-              values={formValues}
-              onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
-              onSubmit={handleSave}
-              onCancel={() => setEditing(false)}
-              submitLabel="Save Changes"
-              loading={saveLoading}
-              error={saveError}
-            />
+            <>
+              <RecordForm
+                fields={EDIT_FIELDS}
+                values={formValues}
+                onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
+                onSubmit={handleSave}
+                onCancel={() => { setEditing(false); setCustomFields(account.custom_fields ?? {}) }}
+                submitLabel="Save Changes"
+                loading={saveLoading}
+                error={saveError}
+              />
+              <DynamicFieldsSection
+                objectName="accounts"
+                values={customFields}
+                onChange={setCustomFields}
+              />
+            </>
           ) : (
-            <DetailView record={account as unknown as Record<string, unknown>} fields={DETAIL_FIELDS} />
+            <>
+              <DetailView record={account as unknown as Record<string, unknown>} fields={DETAIL_FIELDS} />
+              <DynamicFieldsSection
+                objectName="accounts"
+                values={account.custom_fields ?? {}}
+                onChange={() => undefined}
+                disabled
+              />
+            </>
           )}
         </CardContent>
       </Card>

@@ -5,6 +5,7 @@ import { contactsApi } from '@/api/contacts'
 import type { Account, Contact, ContactUpdate } from '@/api/types'
 import DeleteConfirmDialog from '@/components/DeleteConfirmDialog'
 import DetailView, { type FieldDefinition } from '@/components/DetailView'
+import DynamicFieldsSection from '@/components/DynamicFieldsSection'
 import RecordForm from '@/components/RecordForm'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -22,6 +23,7 @@ export default function ContactDetailPage() {
   const [showDelete, setShowDelete] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [accounts, setAccounts] = useState<Account[]>([])
+  const [customFields, setCustomFields] = useState<Record<string, unknown>>({})
 
   useEffect(() => {
     void accountsApi.list({ limit: 200 }).then((res) => setAccounts(res.items))
@@ -75,6 +77,7 @@ export default function ContactDetailPage() {
     try {
       const data = await contactsApi.get(parseInt(id, 10))
       setContact(data)
+      setCustomFields(data.custom_fields ?? {})
     } catch {
       setError('Contact not found.')
     } finally {
@@ -93,6 +96,7 @@ export default function ContactDetailPage() {
         formFields.map((f) => [f.key, contact[f.key as keyof Contact] != null ? String(contact[f.key as keyof Contact]) : '']),
       ),
     )
+    setCustomFields(contact.custom_fields ?? {})
     setEditing(true)
   }
 
@@ -112,12 +116,15 @@ export default function ContactDetailPage() {
         account_id: formValues.account_id ? parseInt(formValues.account_id, 10) : null,
         mailing_city: formValues.mailing_city || null,
         mailing_country: formValues.mailing_country || null,
+        custom_fields: customFields,
       }
       const updated = await contactsApi.update(parseInt(id, 10), payload)
       setContact(updated)
+      setCustomFields(updated.custom_fields ?? {})
       setEditing(false)
-    } catch {
-      setSaveError('Failed to save changes.')
+    } catch (err: unknown) {
+      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+      setSaveError(typeof detail === 'string' ? detail : 'Failed to save changes.')
     } finally {
       setSaveLoading(false)
     }
@@ -168,18 +175,33 @@ export default function ContactDetailPage() {
         </CardHeader>
         <CardContent>
           {editing ? (
-            <RecordForm
-              fields={formFields}
-              values={formValues}
-              onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
-              onSubmit={handleSave}
-              onCancel={() => setEditing(false)}
-              submitLabel="Save Changes"
-              loading={saveLoading}
-              error={saveError}
-            />
+            <>
+              <RecordForm
+                fields={formFields}
+                values={formValues}
+                onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
+                onSubmit={handleSave}
+                onCancel={() => { setEditing(false); setCustomFields(contact.custom_fields ?? {}) }}
+                submitLabel="Save Changes"
+                loading={saveLoading}
+                error={saveError}
+              />
+              <DynamicFieldsSection
+                objectName="contacts"
+                values={customFields}
+                onChange={setCustomFields}
+              />
+            </>
           ) : (
-            <DetailView record={contact as unknown as Record<string, unknown>} fields={detailFields} />
+            <>
+              <DetailView record={contact as unknown as Record<string, unknown>} fields={detailFields} />
+              <DynamicFieldsSection
+                objectName="contacts"
+                values={contact.custom_fields ?? {}}
+                onChange={() => undefined}
+                disabled
+              />
+            </>
           )}
         </CardContent>
       </Card>

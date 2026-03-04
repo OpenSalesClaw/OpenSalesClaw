@@ -5,6 +5,7 @@ import { opportunitiesApi } from '@/api/opportunities'
 import type { Account, Opportunity, OpportunityUpdate } from '@/api/types'
 import DeleteConfirmDialog from '@/components/DeleteConfirmDialog'
 import DetailView, { type FieldDefinition } from '@/components/DetailView'
+import DynamicFieldsSection from '@/components/DynamicFieldsSection'
 import RecordForm from '@/components/RecordForm'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -29,6 +30,7 @@ export default function OpportunityDetailPage() {
   const [showDelete, setShowDelete] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [accounts, setAccounts] = useState<Account[]>([])
+  const [customFields, setCustomFields] = useState<Record<string, unknown>>({})
 
   useEffect(() => {
     void accountsApi.list({ limit: 200 }).then((res) => setAccounts(res.items))
@@ -87,6 +89,7 @@ export default function OpportunityDetailPage() {
     try {
       const data = await opportunitiesApi.get(parseInt(id, 10))
       setOpp(data)
+      setCustomFields(data.custom_fields ?? {})
     } catch {
       setError('Opportunity not found.')
     } finally {
@@ -101,6 +104,7 @@ export default function OpportunityDetailPage() {
     setFormValues(Object.fromEntries(
       formFields.map((f) => [f.key, opp[f.key as keyof Opportunity] != null ? String(opp[f.key as keyof Opportunity]) : ''])
     ))
+    setCustomFields(opp.custom_fields ?? {})
     setEditing(true)
   }
 
@@ -117,11 +121,13 @@ export default function OpportunityDetailPage() {
         account_id: formValues.account_id ? parseInt(formValues.account_id, 10) : null,
         next_step: formValues.next_step || null,
         description: formValues.description || null,
+        custom_fields: customFields,
       }
       const updated = await opportunitiesApi.update(parseInt(id, 10), payload)
-      setOpp(updated); setEditing(false)
-    } catch {
-      setSaveError('Failed to save changes.')
+      setOpp(updated); setCustomFields(updated.custom_fields ?? {}); setEditing(false)
+    } catch (err: unknown) {
+      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+      setSaveError(typeof detail === 'string' ? detail : 'Failed to save changes.')
     } finally {
       setSaveLoading(false)
     }
@@ -159,18 +165,33 @@ export default function OpportunityDetailPage() {
         <CardHeader><CardTitle>Opportunity Details</CardTitle></CardHeader>
         <CardContent>
           {editing ? (
-            <RecordForm
-              fields={formFields}
-              values={formValues}
-              onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
-              onSubmit={handleSave}
-              onCancel={() => setEditing(false)}
-              submitLabel="Save Changes"
-              loading={saveLoading}
-              error={saveError}
-            />
+            <>
+              <RecordForm
+                fields={formFields}
+                values={formValues}
+                onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
+                onSubmit={handleSave}
+                onCancel={() => { setEditing(false); setCustomFields(opp.custom_fields ?? {}) }}
+                submitLabel="Save Changes"
+                loading={saveLoading}
+                error={saveError}
+              />
+              <DynamicFieldsSection
+                objectName="opportunities"
+                values={customFields}
+                onChange={setCustomFields}
+              />
+            </>
           ) : (
-            <DetailView record={opp as unknown as Record<string, unknown>} fields={detailFields} />
+            <>
+              <DetailView record={opp as unknown as Record<string, unknown>} fields={detailFields} />
+              <DynamicFieldsSection
+                objectName="opportunities"
+                values={opp.custom_fields ?? {}}
+                onChange={() => undefined}
+                disabled
+              />
+            </>
           )}
         </CardContent>
       </Card>

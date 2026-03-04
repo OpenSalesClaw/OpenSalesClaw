@@ -5,6 +5,7 @@ import { casesApi } from '@/api/cases'
 import type { Account, Case, CaseUpdate } from '@/api/types'
 import DeleteConfirmDialog from '@/components/DeleteConfirmDialog'
 import DetailView, { type FieldDefinition } from '@/components/DetailView'
+import DynamicFieldsSection from '@/components/DynamicFieldsSection'
 import RecordForm from '@/components/RecordForm'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -33,6 +34,7 @@ export default function CaseDetailPage() {
   const [showDelete, setShowDelete] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [accounts, setAccounts] = useState<Account[]>([])
+  const [customFields, setCustomFields] = useState<Record<string, unknown>>({})
 
   useEffect(() => {
     void accountsApi.list({ limit: 200 }).then((res) => setAccounts(res.items))
@@ -81,6 +83,7 @@ export default function CaseDetailPage() {
     try {
       const data = await casesApi.get(parseInt(id, 10))
       setCaseRecord(data)
+      setCustomFields(data.custom_fields ?? {})
     } catch {
       setError('Case not found.')
     } finally {
@@ -95,6 +98,7 @@ export default function CaseDetailPage() {
     setFormValues(Object.fromEntries(
       formFields.map((f) => [f.key, caseRecord[f.key as keyof Case] != null ? String(caseRecord[f.key as keyof Case]) : ''])
     ))
+    setCustomFields(caseRecord.custom_fields ?? {})
     setEditing(true)
   }
 
@@ -109,11 +113,13 @@ export default function CaseDetailPage() {
         priority: formValues.priority || undefined,
         account_id: formValues.account_id ? parseInt(formValues.account_id, 10) : null,
         reason: formValues.reason || null,
+        custom_fields: customFields,
       }
       const updated = await casesApi.update(parseInt(id, 10), payload)
-      setCaseRecord(updated); setEditing(false)
-    } catch {
-      setSaveError('Failed to save changes.')
+      setCaseRecord(updated); setCustomFields(updated.custom_fields ?? {}); setEditing(false)
+    } catch (err: unknown) {
+      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+      setSaveError(typeof detail === 'string' ? detail : 'Failed to save changes.')
     } finally {
       setSaveLoading(false)
     }
@@ -152,18 +158,33 @@ export default function CaseDetailPage() {
         <CardHeader><CardTitle>Case Details</CardTitle></CardHeader>
         <CardContent>
           {editing ? (
-            <RecordForm
-              fields={formFields}
-              values={formValues}
-              onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
-              onSubmit={handleSave}
-              onCancel={() => setEditing(false)}
-              submitLabel="Save Changes"
-              loading={saveLoading}
-              error={saveError}
-            />
+            <>
+              <RecordForm
+                fields={formFields}
+                values={formValues}
+                onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
+                onSubmit={handleSave}
+                onCancel={() => { setEditing(false); setCustomFields(caseRecord.custom_fields ?? {}) }}
+                submitLabel="Save Changes"
+                loading={saveLoading}
+                error={saveError}
+              />
+              <DynamicFieldsSection
+                objectName="cases"
+                values={customFields}
+                onChange={setCustomFields}
+              />
+            </>
           ) : (
-            <DetailView record={caseRecord as unknown as Record<string, unknown>} fields={detailFields} />
+            <>
+              <DetailView record={caseRecord as unknown as Record<string, unknown>} fields={detailFields} />
+              <DynamicFieldsSection
+                objectName="cases"
+                values={caseRecord.custom_fields ?? {}}
+                onChange={() => undefined}
+                disabled
+              />
+            </>
           )}
         </CardContent>
       </Card>

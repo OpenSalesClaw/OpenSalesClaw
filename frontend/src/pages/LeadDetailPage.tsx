@@ -4,6 +4,7 @@ import { leadsApi } from '@/api/leads'
 import type { Lead, LeadUpdate } from '@/api/types'
 import DeleteConfirmDialog from '@/components/DeleteConfirmDialog'
 import DetailView, { type FieldDefinition } from '@/components/DetailView'
+import DynamicFieldsSection from '@/components/DynamicFieldsSection'
 import RecordForm from '@/components/RecordForm'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -72,6 +73,7 @@ export default function LeadDetailPage() {
   const [saveError, setSaveError] = useState<string | null>(null)
   const [showDelete, setShowDelete] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [customFields, setCustomFields] = useState<Record<string, unknown>>({})
 
   const load = useCallback(async () => {
     if (!id) return
@@ -79,6 +81,7 @@ export default function LeadDetailPage() {
     try {
       const data = await leadsApi.get(parseInt(id, 10))
       setLead(data)
+      setCustomFields(data.custom_fields ?? {})
     } catch {
       setError('Lead not found.')
     } finally {
@@ -97,6 +100,7 @@ export default function LeadDetailPage() {
         FORM_FIELDS.map((f) => [f.key, lead[f.key as keyof Lead] != null ? String(lead[f.key as keyof Lead]) : '']),
       ),
     )
+    setCustomFields(lead.custom_fields ?? {})
     setEditing(true)
   }
 
@@ -115,12 +119,15 @@ export default function LeadDetailPage() {
         lead_source: formValues.lead_source || null,
         title: formValues.title || null,
         industry: formValues.industry || null,
+        custom_fields: customFields,
       }
       const updated = await leadsApi.update(parseInt(id, 10), payload)
       setLead(updated)
+      setCustomFields(updated.custom_fields ?? {})
       setEditing(false)
-    } catch {
-      setSaveError('Failed to save changes.')
+    } catch (err: unknown) {
+      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+      setSaveError(typeof detail === 'string' ? detail : 'Failed to save changes.')
     } finally {
       setSaveLoading(false)
     }
@@ -169,18 +176,33 @@ export default function LeadDetailPage() {
         </CardHeader>
         <CardContent>
           {editing ? (
-            <RecordForm
-              fields={FORM_FIELDS}
-              values={formValues}
-              onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
-              onSubmit={handleSave}
-              onCancel={() => setEditing(false)}
-              submitLabel="Save Changes"
-              loading={saveLoading}
-              error={saveError}
-            />
+            <>
+              <RecordForm
+                fields={FORM_FIELDS}
+                values={formValues}
+                onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
+                onSubmit={handleSave}
+                onCancel={() => { setEditing(false); setCustomFields(lead.custom_fields ?? {}) }}
+                submitLabel="Save Changes"
+                loading={saveLoading}
+                error={saveError}
+              />
+              <DynamicFieldsSection
+                objectName="leads"
+                values={customFields}
+                onChange={setCustomFields}
+              />
+            </>
           ) : (
-            <DetailView record={lead as unknown as Record<string, unknown>} fields={DETAIL_FIELDS} />
+            <>
+              <DetailView record={lead as unknown as Record<string, unknown>} fields={DETAIL_FIELDS} />
+              <DynamicFieldsSection
+                objectName="leads"
+                values={lead.custom_fields ?? {}}
+                onChange={() => undefined}
+                disabled
+              />
+            </>
           )}
         </CardContent>
       </Card>

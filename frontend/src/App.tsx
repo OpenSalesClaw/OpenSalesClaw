@@ -20,6 +20,15 @@ import AdminRolesPage from './pages/admin/AdminRolesPage'
 import AdminUserCreatePage from './pages/admin/AdminUserCreatePage'
 import AdminUserDetailPage from './pages/admin/AdminUserDetailPage'
 import AdminUsersPage from './pages/admin/AdminUsersPage'
+import AdminCustomFieldsPage from './pages/admin/AdminCustomFieldsPage'
+import AdminCustomFieldCreatePage from './pages/admin/AdminCustomFieldCreatePage'
+import AdminCustomFieldDetailPage from './pages/admin/AdminCustomFieldDetailPage'
+import AdminCustomObjectsPage from './pages/admin/AdminCustomObjectsPage'
+import AdminCustomObjectCreatePage from './pages/admin/AdminCustomObjectCreatePage'
+import AdminCustomObjectDetailPage from './pages/admin/AdminCustomObjectDetailPage'
+import CustomObjectListPage from './pages/custom/CustomObjectListPage'
+import CustomObjectCreatePage from './pages/custom/CustomObjectCreatePage'
+import CustomObjectDetailPage from './pages/custom/CustomObjectDetailPage'
 import { useAuthStore } from './stores/authStore'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -179,6 +188,81 @@ export default function App() {
             <AdminPageRoute>
               <AdminRoleDetailPage />
             </AdminPageRoute>
+          }
+        />
+        {/* Admin: Custom Fields */}
+        <Route
+          path="/admin/custom-fields"
+          element={
+            <AdminPageRoute>
+              <AdminCustomFieldsPage />
+            </AdminPageRoute>
+          }
+        />
+        <Route
+          path="/admin/custom-fields/new"
+          element={
+            <AdminPageRoute>
+              <AdminCustomFieldCreatePage />
+            </AdminPageRoute>
+          }
+        />
+        <Route
+          path="/admin/custom-fields/:id"
+          element={
+            <AdminPageRoute>
+              <AdminCustomFieldDetailPage />
+            </AdminPageRoute>
+          }
+        />
+        {/* Admin: Custom Objects */}
+        <Route
+          path="/admin/custom-objects"
+          element={
+            <AdminPageRoute>
+              <AdminCustomObjectsPage />
+            </AdminPageRoute>
+          }
+        />
+        <Route
+          path="/admin/custom-objects/new"
+          element={
+            <AdminPageRoute>
+              <AdminCustomObjectCreatePage />
+            </AdminPageRoute>
+          }
+        />
+        <Route
+          path="/admin/custom-objects/:apiName"
+          element={
+            <AdminPageRoute>
+              <AdminCustomObjectDetailPage />
+            </AdminPageRoute>
+          }
+        />
+        {/* Custom Object Records */}
+        <Route
+          path="/objects/:apiName"
+          element={
+            <ProtectedRoute>
+              <CustomObjectListPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/objects/:apiName/new"
+          element={
+            <ProtectedRoute>
+              <CustomObjectCreatePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/objects/:apiName/:id"
+          element={
+            <ProtectedRoute>
+              <CustomObjectDetailPage />
+            </ProtectedRoute>
           }
         />
         {/* Catch-all: redirect unknown paths to dashboard */}

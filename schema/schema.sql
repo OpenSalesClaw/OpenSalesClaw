@@ -322,3 +322,67 @@ CREATE INDEX idx_custom_field_definitions_custom_fields ON custom_field_definiti
 CREATE TRIGGER trg_custom_field_definitions_set_updated_at
     BEFORE UPDATE ON custom_field_definitions
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+
+-- =============================================================================
+-- TABLE: custom_objects
+-- =============================================================================
+CREATE TABLE custom_objects (
+    id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    sfid            VARCHAR(40),
+    api_name        VARCHAR(100) NOT NULL,    -- e.g. 'project', 'warranty_claim'
+    label           VARCHAR(255) NOT NULL,
+    plural_label    VARCHAR(255) NOT NULL,
+    description     TEXT,
+    icon_name       VARCHAR(100),             -- Lucide icon name, e.g. 'box', 'folder'
+    is_active       BOOLEAN NOT NULL DEFAULT TRUE,
+    custom_fields   JSONB NOT NULL DEFAULT '{}'::jsonb,
+    owner_id        BIGINT REFERENCES users(id),
+    created_by_id   BIGINT REFERENCES users(id),
+    updated_by_id   BIGINT REFERENCES users(id),
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    is_deleted      BOOLEAN NOT NULL DEFAULT FALSE,
+    deleted_at      TIMESTAMPTZ,
+    deleted_by_id   BIGINT REFERENCES users(id),
+    CONSTRAINT uq_custom_objects_api_name UNIQUE (api_name)
+);
+
+CREATE INDEX idx_custom_objects_api_name      ON custom_objects (api_name);
+CREATE INDEX idx_custom_objects_owner_id      ON custom_objects (owner_id);
+CREATE INDEX idx_custom_objects_custom_fields ON custom_objects USING GIN (custom_fields);
+
+CREATE TRIGGER trg_custom_objects_set_updated_at
+    BEFORE UPDATE ON custom_objects
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+
+-- =============================================================================
+-- TABLE: custom_object_records
+-- =============================================================================
+CREATE TABLE custom_object_records (
+    id                BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    sfid              VARCHAR(40),
+    custom_object_id  BIGINT NOT NULL REFERENCES custom_objects(id),
+    name              VARCHAR(255),           -- Human-readable record name
+    data              JSONB NOT NULL DEFAULT '{}'::jsonb,  -- Dynamic field values
+    custom_fields     JSONB NOT NULL DEFAULT '{}'::jsonb,
+    owner_id          BIGINT REFERENCES users(id),
+    created_by_id     BIGINT REFERENCES users(id),
+    updated_by_id     BIGINT REFERENCES users(id),
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    is_deleted        BOOLEAN NOT NULL DEFAULT FALSE,
+    deleted_at        TIMESTAMPTZ,
+    deleted_by_id     BIGINT REFERENCES users(id)
+);
+
+CREATE INDEX idx_custom_object_records_custom_object_id ON custom_object_records (custom_object_id);
+CREATE INDEX idx_custom_object_records_name             ON custom_object_records (name);
+CREATE INDEX idx_custom_object_records_owner_id         ON custom_object_records (owner_id);
+CREATE INDEX idx_custom_object_records_data             ON custom_object_records USING GIN (data);
+CREATE INDEX idx_custom_object_records_custom_fields    ON custom_object_records USING GIN (custom_fields);
+
+CREATE TRIGGER trg_custom_object_records_set_updated_at
+    BEFORE UPDATE ON custom_object_records
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();

@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../stores/authStore'
+import { useCustomObjectsStore } from '../stores/customObjectsStore'
 import { Button } from './ui/button'
 import { Separator } from './ui/separator'
 
@@ -19,6 +21,13 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
+  const { objects: customObjects, fetch: fetchCustomObjects } = useCustomObjectsStore()
+
+  // Load active custom objects for the sidebar nav
+  useEffect(() => {
+    void fetchCustomObjects()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleLogout = () => {
     logout()
@@ -51,6 +60,34 @@ export default function Layout({ children }: LayoutProps) {
             </NavLink>
           ))}
         </nav>
+
+        {/* Custom Objects — dynamically injected active custom objects */}
+        {customObjects.length > 0 && (
+          <>
+            <Separator className="bg-slate-700" />
+            <nav className="flex flex-col py-2 gap-0.5">
+              <span className="px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-widest text-slate-500">
+                Custom
+              </span>
+              {customObjects.map((obj) => (
+                <NavLink
+                  key={obj.api_name}
+                  to={`/objects/${obj.api_name}`}
+                  className={({ isActive }) =>
+                    [
+                      'block px-4 py-2 text-sm no-underline transition-colors',
+                      isActive
+                        ? 'text-slate-100 bg-slate-700'
+                        : 'text-slate-400 hover:text-slate-100 hover:bg-slate-700/50',
+                    ].join(' ')
+                  }
+                >
+                  {obj.plural_label}
+                </NavLink>
+              ))}
+            </nav>
+          </>
+        )}
 
         {/* Admin link — visible only to superusers */}
         {user?.is_superuser && (

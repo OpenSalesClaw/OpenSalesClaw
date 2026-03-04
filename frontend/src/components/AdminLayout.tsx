@@ -6,7 +6,8 @@ import { Separator } from './ui/separator'
 const ADMIN_NAV: { label: string; to: string }[] = [
   { label: 'Users', to: '/admin/users' },
   { label: 'Roles', to: '/admin/roles' },
-  // Future: Custom Fields, Custom Objects, Picklists, Settings…
+  { label: 'Custom Fields', to: '/admin/custom-fields' },
+  { label: 'Custom Objects', to: '/admin/custom-objects' },
 ]
 
 interface AdminLayoutProps {

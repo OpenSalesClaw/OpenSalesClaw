@@ -275,3 +275,90 @@ export interface RoleCreate {
 }
 
 export type RoleUpdate = Partial<RoleCreate>
+
+// ---------------------------------------------------------------------------
+// Custom Field Definition
+// ---------------------------------------------------------------------------
+
+export type FieldType =
+  | 'text'
+  | 'number'
+  | 'date'
+  | 'datetime'
+  | 'boolean'
+  | 'picklist'
+  | 'email'
+  | 'url'
+  | 'phone'
+  | 'currency'
+  | 'percent'
+  | 'textarea'
+
+export interface CustomFieldDefinition extends StandardFields {
+  object_name: string
+  field_name: string
+  field_label: string | null
+  field_type: FieldType
+  is_required: boolean
+  default_value: string | null
+  picklist_values: string[] | null
+  field_order: number | null
+  description: string | null
+}
+
+export interface CustomFieldDefinitionCreate {
+  object_name: string
+  field_name: string
+  field_label?: string | null
+  field_type: FieldType
+  is_required?: boolean
+  default_value?: string | null
+  picklist_values?: string[] | null
+  field_order?: number | null
+  description?: string | null
+}
+
+export type CustomFieldDefinitionUpdate = Partial<
+  Pick<
+    CustomFieldDefinitionCreate,
+    'field_label' | 'is_required' | 'default_value' | 'picklist_values' | 'field_order' | 'description'
+  >
+>
+
+// ---------------------------------------------------------------------------
+// Custom Object
+// ---------------------------------------------------------------------------
+
+export interface CustomObject extends StandardFields {
+  api_name: string
+  label: string
+  plural_label: string
+  description: string | null
+  icon_name: string | null
+  is_active: boolean
+}
+
+export interface CustomObjectCreate {
+  api_name: string
+  label: string
+  plural_label: string
+  description?: string | null
+  icon_name?: string | null
+  is_active?: boolean
+}
+
+export type CustomObjectUpdate = Partial<Omit<CustomObjectCreate, 'api_name'>>
+
+export interface CustomObjectRecord extends StandardFields {
+  custom_object_id: number
+  name: string | null
+  data: Record<string, unknown>
+}
+
+export interface CustomObjectRecordCreate {
+  name?: string | null
+  data?: Record<string, unknown>
+  custom_fields?: Record<string, unknown>
+}
+
+export type CustomObjectRecordUpdate = Partial<CustomObjectRecordCreate>
