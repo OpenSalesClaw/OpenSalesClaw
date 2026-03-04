@@ -20,7 +20,6 @@ export interface StandardFields {
   updated_by_id: number | null
   created_at: string
   updated_at: string
-  is_deleted: boolean
   sfid: string | null
   custom_fields: Record<string, unknown>
 }
@@ -73,7 +72,7 @@ export interface Contact extends StandardFields {
   last_name: string
   email: string | null
   phone: string | null
-  mobile: string | null
+  mobile_phone: string | null
   title: string | null
   department: string | null
   account_id: number | null
@@ -88,7 +87,7 @@ export interface ContactCreate {
   first_name?: string | null
   email?: string | null
   phone?: string | null
-  mobile?: string | null
+  mobile_phone?: string | null
   title?: string | null
   department?: string | null
   account_id?: number | null
@@ -115,24 +114,21 @@ export interface Lead extends StandardFields {
   lead_source: string | null
   title: string | null
   industry: string | null
-  annual_revenue: number | null
-  rating: string | null
-  is_converted: boolean
   converted_at: string | null
+  converted_account_id: number | null
+  converted_contact_id: number | null
 }
 
 export interface LeadCreate {
   last_name: string
+  company: string
   first_name?: string | null
-  company?: string | null
   email?: string | null
   phone?: string | null
   status?: string
   lead_source?: string | null
   title?: string | null
   industry?: string | null
-  annual_revenue?: number | null
-  rating?: string | null
   custom_fields?: Record<string, unknown>
 }
 

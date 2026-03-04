@@ -5,15 +5,21 @@ from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import NotFoundError
+from app.core.exceptions import ConflictError, NotFoundError
 from app.core.pagination import PaginationParams
 from app.models.base import BaseEntity
 
 ModelType = TypeVar("ModelType", bound=BaseEntity)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
 UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
+
+
+def escape_like(value: str) -> str:
+    """Escape special LIKE pattern characters (%, _, \\) in user-supplied input."""
+    return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
 
 class CRUDService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
@@ -46,6 +52,9 @@ class CRUDService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         **filters: Any,
     ) -> tuple[list[ModelType], int]:
         query = select(self.model).where(self.model.is_deleted.is_(False))
+        # owner_id is on every entity — handle it centrally so individual services don't need to repeat it.
+        if (owner_id := filters.get("owner_id")) is not None:
+            query = query.where(self.model.owner_id == owner_id)
         query = self.apply_list_filters(query, **filters)
 
         count_result = await db.execute(select(func.count()).select_from(query.subquery()))
@@ -74,7 +83,11 @@ class CRUDService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             owner_id=created_by_id,
         )
         db.add(record)
-        await db.flush()
+        try:
+            await db.flush()
+        except IntegrityError as exc:
+            await db.rollback()
+            raise ConflictError("A record with these values already exists.") from exc
         await db.refresh(record)
         return record
 

@@ -1,11 +1,16 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import BigInteger, ForeignKey, Identity, String, Text
+from sqlalchemy import BigInteger, ForeignKey, Identity, Sequence, String, Text
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import BaseEntity
+from app.models.base import Base, BaseEntity
+
+# PostgreSQL sequence for race-condition-free case number generation.
+# Attaching to Base.metadata ensures it is created by Base.metadata.create_all (tests)
+# as well as by Alembic migrations (production).
+case_number_seq = Sequence("case_number_seq", metadata=Base.metadata)
 
 if TYPE_CHECKING:
     from app.models.account import Account

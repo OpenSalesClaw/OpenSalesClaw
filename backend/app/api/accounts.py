@@ -8,7 +8,7 @@ from app.core.dependencies import get_current_active_user
 from app.core.pagination import PaginatedResponse, PaginationParams
 from app.models.user import User
 from app.schemas.account import AccountCreate, AccountRead, AccountUpdate
-from app.services import account as account_service
+from app.services.account import account_service
 
 router = APIRouter(prefix="/api/accounts", tags=["accounts"])
 
@@ -21,9 +21,12 @@ async def list_accounts(
     name: str | None = Query(default=None, description="Filter by name (partial match)"),
     type: str | None = Query(default=None, description="Filter by account type"),
     industry: str | None = Query(default=None, description="Filter by industry (partial match)"),
+    owner_id: int | None = Query(default=None, description="Filter by owner ID"),
 ) -> PaginatedResponse[AccountRead]:
-    items, total = await account_service.list_accounts(db, pagination, name=name, type=type, industry=industry)
-    return PaginatedResponse(items=items, total=total, offset=pagination.offset, limit=pagination.limit)  # type: ignore[arg-type]
+    items, total = await account_service.list(
+        db, pagination, name=name, type=type, industry=industry, owner_id=owner_id
+    )
+    return PaginatedResponse.from_result([AccountRead.model_validate(i) for i in items], total, pagination)
 
 
 @router.get("/{account_id}", response_model=AccountRead)
@@ -32,7 +35,7 @@ async def get_account(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_active_user)],
 ) -> AccountRead:
-    return await account_service.get_account_by_id(db, account_id)  # type: ignore[return-value]
+    return AccountRead.model_validate(await account_service.get_by_id(db, account_id))
 
 
 @router.post("", response_model=AccountRead, status_code=status.HTTP_201_CREATED)
@@ -41,7 +44,7 @@ async def create_account(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_active_user)],
 ) -> AccountRead:
-    return await account_service.create_account(db, data, created_by_id=current_user.id)  # type: ignore[return-value]
+    return AccountRead.model_validate(await account_service.create(db, data, created_by_id=current_user.id))
 
 
 @router.patch("/{account_id}", response_model=AccountRead)
@@ -51,7 +54,7 @@ async def update_account(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_active_user)],
 ) -> AccountRead:
-    return await account_service.update_account(db, account_id, data, updated_by_id=current_user.id)  # type: ignore[return-value]
+    return AccountRead.model_validate(await account_service.update(db, account_id, data, updated_by_id=current_user.id))
 
 
 @router.delete("/{account_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -60,4 +63,4 @@ async def delete_account(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_active_user)],
 ) -> None:
-    await account_service.delete_account(db, account_id, deleted_by_id=current_user.id)
+    await account_service.delete(db, account_id, deleted_by_id=current_user.id)

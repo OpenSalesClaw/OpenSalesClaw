@@ -12,7 +12,7 @@ from app.schemas.custom_field_definition import (
     CustomFieldDefinitionRead,
     CustomFieldDefinitionUpdate,
 )
-from app.services import custom_field_definition as cfd_service
+from app.services.custom_field_definition import custom_field_definition_service
 
 router = APIRouter(prefix="/api/custom-field-definitions", tags=["custom-field-definitions"])
 
@@ -24,8 +24,10 @@ async def list_custom_field_definitions(
     pagination: Annotated[PaginationParams, Depends()],
     object_name: str | None = Query(default=None, description="Filter by object name (e.g. 'accounts')"),
 ) -> PaginatedResponse[CustomFieldDefinitionRead]:
-    items, total = await cfd_service.list_custom_field_definitions(db, pagination, object_name=object_name)
-    return PaginatedResponse(items=items, total=total, offset=pagination.offset, limit=pagination.limit)  # type: ignore[arg-type]
+    items, total = await custom_field_definition_service.list(db, pagination, object_name=object_name)
+    return PaginatedResponse.from_result(
+        [CustomFieldDefinitionRead.model_validate(i) for i in items], total, pagination
+    )
 
 
 @router.get("/{definition_id}", response_model=CustomFieldDefinitionRead)
@@ -34,7 +36,7 @@ async def get_custom_field_definition(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_active_user)],
 ) -> CustomFieldDefinitionRead:
-    return await cfd_service.get_custom_field_definition_by_id(db, definition_id)  # type: ignore[return-value]
+    return CustomFieldDefinitionRead.model_validate(await custom_field_definition_service.get_by_id(db, definition_id))
 
 
 @router.post("", response_model=CustomFieldDefinitionRead, status_code=status.HTTP_201_CREATED)
@@ -43,7 +45,9 @@ async def create_custom_field_definition(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_superuser)],
 ) -> CustomFieldDefinitionRead:
-    return await cfd_service.create_custom_field_definition(db, data, created_by_id=current_user.id)  # type: ignore[return-value]
+    return CustomFieldDefinitionRead.model_validate(
+        await custom_field_definition_service.create(db, data, created_by_id=current_user.id)
+    )
 
 
 @router.patch("/{definition_id}", response_model=CustomFieldDefinitionRead)
@@ -53,7 +57,9 @@ async def update_custom_field_definition(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_superuser)],
 ) -> CustomFieldDefinitionRead:
-    return await cfd_service.update_custom_field_definition(db, definition_id, data, updated_by_id=current_user.id)  # type: ignore[return-value]
+    return CustomFieldDefinitionRead.model_validate(
+        await custom_field_definition_service.update(db, definition_id, data, updated_by_id=current_user.id)
+    )
 
 
 @router.delete("/{definition_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -62,4 +68,4 @@ async def delete_custom_field_definition(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_superuser)],
 ) -> None:
-    await cfd_service.delete_custom_field_definition(db, definition_id, deleted_by_id=current_user.id)
+    await custom_field_definition_service.delete(db, definition_id, deleted_by_id=current_user.id)

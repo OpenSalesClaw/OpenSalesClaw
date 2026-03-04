@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../stores/authStore'
+import { Button } from './ui/button'
 
 const NAV_ITEMS: { label: string; to: string }[] = [
   { label: 'Dashboard', to: '/' },
@@ -26,22 +27,24 @@ export default function Layout({ children }: LayoutProps) {
   const fullName = [user?.first_name, user?.last_name].filter(Boolean).join(' ') || user?.email || 'User'
 
   return (
-    <div style={styles.root}>
+    <div className="flex h-screen overflow-hidden bg-gray-50 font-sans">
       {/* Sidebar */}
-      <aside style={styles.sidebar}>
-        <div style={styles.sidebarHeader}>
-          <span style={styles.logo}>OpenSalesClaw</span>
+      <aside className="w-[220px] shrink-0 flex flex-col bg-slate-800">
+        <div className="px-4 py-5 border-b border-slate-700">
+          <span className="font-bold text-[0.9375rem] text-slate-100 tracking-tight">OpenSalesClaw</span>
         </div>
-        <nav style={styles.nav}>
+        <nav className="flex flex-col py-3 gap-0.5">
           {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.to === '/'}
-              style={({ isActive }) => ({
-                ...styles.navLink,
-                ...(isActive ? styles.navLinkActive : {}),
-              })}
+              className={({ isActive }) =>
+                [
+                  'block px-4 py-2 text-sm no-underline transition-colors',
+                  isActive ? 'text-slate-100 bg-slate-700' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-700/50',
+                ].join(' ')
+              }
             >
               {item.label}
             </NavLink>
@@ -50,107 +53,21 @@ export default function Layout({ children }: LayoutProps) {
       </aside>
 
       {/* Main area */}
-      <div style={styles.main}>
+      <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top bar */}
-        <header style={styles.topbar}>
+        <header className="h-14 shrink-0 bg-white border-b border-gray-200 flex items-center justify-between px-6">
           <span />
-          <div style={styles.userArea}>
-            <span style={styles.userName}>{fullName}</span>
-            <button onClick={handleLogout} style={styles.logoutButton}>
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium text-gray-700">{fullName}</span>
+            <Button variant="outline" size="sm" onClick={handleLogout}>
               Logout
-            </button>
+            </Button>
           </div>
         </header>
 
         {/* Page content */}
-        <main style={styles.content}>{children}</main>
+        <main className="flex-1 overflow-auto p-6">{children}</main>
       </div>
     </div>
   )
-}
-
-const styles: Record<string, React.CSSProperties> = {
-  root: {
-    display: 'flex',
-    height: '100vh',
-    overflow: 'hidden',
-    fontFamily: 'system-ui, -apple-system, sans-serif',
-    backgroundColor: '#f9fafb',
-  },
-  sidebar: {
-    width: 220,
-    flexShrink: 0,
-    backgroundColor: '#1e293b',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  sidebarHeader: {
-    padding: '1.25rem 1rem',
-    borderBottom: '1px solid #334155',
-  },
-  logo: {
-    fontWeight: 700,
-    fontSize: '0.9375rem',
-    color: '#f1f5f9',
-    letterSpacing: '-0.01em',
-  },
-  nav: {
-    display: 'flex',
-    flexDirection: 'column',
-    padding: '0.75rem 0',
-    gap: 2,
-  },
-  navLink: {
-    display: 'block',
-    padding: '0.5rem 1rem',
-    fontSize: '0.875rem',
-    color: '#94a3b8',
-    textDecoration: 'none',
-    borderRadius: 0,
-    transition: 'background 0.1s, color 0.1s',
-  },
-  navLinkActive: {
-    color: '#f1f5f9',
-    backgroundColor: '#334155',
-  },
-  main: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden',
-  },
-  topbar: {
-    height: 56,
-    flexShrink: 0,
-    backgroundColor: '#fff',
-    borderBottom: '1px solid #e5e7eb',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '0 1.5rem',
-  },
-  userArea: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem',
-  },
-  userName: {
-    fontSize: '0.875rem',
-    color: '#374151',
-    fontWeight: 500,
-  },
-  logoutButton: {
-    padding: '0.375rem 0.75rem',
-    fontSize: '0.8125rem',
-    border: '1px solid #d1d5db',
-    borderRadius: 6,
-    backgroundColor: '#fff',
-    color: '#374151',
-    cursor: 'pointer',
-  },
-  content: {
-    flex: 1,
-    overflowY: 'auto',
-    padding: '2rem',
-  },
 }

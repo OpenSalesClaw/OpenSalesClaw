@@ -115,10 +115,3 @@ class CustomFieldDefinitionService(
 
 
 custom_field_definition_service = CustomFieldDefinitionService()
-
-get_custom_field_definition_by_id = custom_field_definition_service.get_by_id
-list_custom_field_definitions = custom_field_definition_service.list
-create_custom_field_definition = custom_field_definition_service.create
-update_custom_field_definition = custom_field_definition_service.update
-delete_custom_field_definition = custom_field_definition_service.delete
-validate_custom_fields = custom_field_definition_service.validate_custom_fields

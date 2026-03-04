@@ -1,17 +1,15 @@
-import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { casesApi } from '@/api/cases'
 import type { Case, CaseCreate } from '@/api/types'
 import DataTable, { type Column } from '@/components/DataTable'
-import DeleteConfirmDialog from '@/components/DeleteConfirmDialog'
 import FilterBar from '@/components/FilterBar'
 import RecordForm from '@/components/RecordForm'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { useEntityCRUD } from '@/lib/hooks/useEntityCRUD'
 
 const PAGE_SIZE = 20
-
 const STATUSES = ['New', 'Working', 'Escalated', 'Closed']
 const PRIORITIES = ['Low', 'Medium', 'High', 'Critical']
 
@@ -62,83 +60,39 @@ const FORM_FIELDS = [
   },
 ]
 
+function buildListParams(f: Record<string, string>) {
+  return {
+    ...(f.status ? { status: f.status } : {}),
+    ...(f.priority ? { priority: f.priority } : {}),
+  }
+}
+
+function buildCreatePayload(f: Record<string, string>): CaseCreate {
+  return {
+    subject: f.subject ?? '',
+    description: f.description || null,
+    status: f.status || undefined,
+    priority: f.priority || undefined,
+    account_id: f.account_id ? parseInt(f.account_id, 10) : null,
+    origin: f.origin || null,
+  }
+}
+
 export default function CasesPage() {
   const navigate = useNavigate()
-  const [items, setItems] = useState<Case[]>([])
-  const [total, setTotal] = useState(0)
-  const [page, setPage] = useState(1)
-  const [loading, setLoading] = useState(false)
-  const [filterValues, setFilterValues] = useState<Record<string, string>>({})
-
-  const [showCreate, setShowCreate] = useState(false)
-  const [formValues, setFormValues] = useState<Record<string, string>>({})
-  const [formError, setFormError] = useState<string | null>(null)
-  const [formLoading, setFormLoading] = useState(false)
-
-  const [deleteId, setDeleteId] = useState<number | null>(null)
-  const [deleteLoading, setDeleteLoading] = useState(false)
-
-  const load = useCallback(async (p: number, filters: Record<string, string>) => {
-    setLoading(true)
-    try {
-      const data = await casesApi.list({
-        offset: (p - 1) * PAGE_SIZE,
-        limit: PAGE_SIZE,
-        ...(filters.status ? { status: filters.status } : {}),
-        ...(filters.priority ? { priority: filters.priority } : {}),
-      })
-      setItems(data.items)
-      setTotal(data.total)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    void load(page, filterValues)
-  }, [load, page, filterValues])
-
-  const handleCreate = async () => {
-    setFormError(null)
-    setFormLoading(true)
-    try {
-      const payload: CaseCreate = {
-        subject: formValues.subject ?? '',
-        description: formValues.description || null,
-        status: formValues.status || undefined,
-        priority: formValues.priority || undefined,
-        account_id: formValues.account_id ? parseInt(formValues.account_id, 10) : null,
-        origin: formValues.origin || null,
-      }
-      await casesApi.create(payload)
-      setShowCreate(false)
-      setFormValues({})
-      setPage(1)
-      await load(1, filterValues)
-    } catch {
-      setFormError('Failed to create case.')
-    } finally {
-      setFormLoading(false)
-    }
-  }
-
-  const handleDelete = async () => {
-    if (!deleteId) return
-    setDeleteLoading(true)
-    try {
-      await casesApi.delete(deleteId)
-      setDeleteId(null)
-      await load(page, filterValues)
-    } finally {
-      setDeleteLoading(false)
-    }
-  }
+  const crud = useEntityCRUD<Case, CaseCreate>({
+    api: casesApi,
+    pageSize: PAGE_SIZE,
+    buildListParams,
+    buildCreatePayload,
+    createErrorMessage: 'Failed to create case.',
+  })
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold tracking-tight">Cases</h2>
-        <Button onClick={() => setShowCreate(true)}>+ New Case</Button>
+        <Button onClick={() => crud.setShowCreate(true)}>+ New Case</Button>
       </div>
 
       <FilterBar
@@ -156,52 +110,39 @@ export default function CasesPage() {
             options: PRIORITIES.map((s) => ({ value: s, label: s })),
           },
         ]}
-        values={filterValues}
-        onChange={(k, v) => {
-          setFilterValues((prev) => ({ ...prev, [k]: v }))
-          setPage(1)
-        }}
-        onClear={() => {
-          setFilterValues({})
-          setPage(1)
-        }}
+        values={crud.filterValues}
+        onChange={crud.setFilter}
+        onClear={crud.clearFilters}
       />
 
       <DataTable
         columns={COLUMNS}
-        data={items}
-        loading={loading}
-        total={total}
-        page={page}
+        data={crud.items}
+        loading={crud.loading}
+        total={crud.total}
+        page={crud.page}
         pageSize={PAGE_SIZE}
-        onPageChange={setPage}
+        onPageChange={crud.setPage}
         onRowClick={(r) => navigate(`/cases/${r.id}`)}
       />
 
-      <Dialog open={showCreate} onOpenChange={setShowCreate}>
+      <Dialog open={crud.showCreate} onOpenChange={crud.setShowCreate}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>New Case</DialogTitle>
           </DialogHeader>
           <RecordForm
             fields={FORM_FIELDS}
-            values={formValues}
-            onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
-            onSubmit={handleCreate}
-            onCancel={() => setShowCreate(false)}
+            values={crud.formValues}
+            onChange={crud.setFormValue}
+            onSubmit={() => void crud.handleCreate()}
+            onCancel={() => crud.setShowCreate(false)}
             submitLabel="Create Case"
-            loading={formLoading}
-            error={formError}
+            loading={crud.formLoading}
+            error={crud.formError}
           />
         </DialogContent>
       </Dialog>
-
-      <DeleteConfirmDialog
-        open={deleteId !== null}
-        onOpenChange={(o) => !o && setDeleteId(null)}
-        onConfirm={() => void handleDelete()}
-        loading={deleteLoading}
-      />
     </div>
   )
 }

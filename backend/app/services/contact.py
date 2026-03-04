@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.pagination import PaginationParams
 from app.models.contact import Contact
 from app.schemas.contact import ContactCreate, ContactUpdate
-from app.services.base import CRUDService
+from app.services.base import CRUDService, escape_like
 
 
 class ContactService(CRUDService[Contact, ContactCreate, ContactUpdate]):
@@ -15,9 +15,9 @@ class ContactService(CRUDService[Contact, ContactCreate, ContactUpdate]):
         if account_id := filters.get("account_id"):
             query = query.where(Contact.account_id == account_id)
         if last_name := filters.get("last_name"):
-            query = query.where(Contact.last_name.ilike(f"%{last_name}%"))
+            query = query.where(Contact.last_name.ilike(f"%{escape_like(last_name)}%", escape="\\"))
         if email := filters.get("email"):
-            query = query.where(Contact.email.ilike(f"%{email}%"))
+            query = query.where(Contact.email.ilike(f"%{escape_like(email)}%", escape="\\"))
         return query
 
     async def list(
@@ -35,10 +35,3 @@ class ContactService(CRUDService[Contact, ContactCreate, ContactUpdate]):
 
 
 contact_service = ContactService()
-
-# Convenience aliases
-get_contact_by_id = contact_service.get_by_id
-list_contacts = contact_service.list
-create_contact = contact_service.create
-update_contact = contact_service.update
-delete_contact = contact_service.delete

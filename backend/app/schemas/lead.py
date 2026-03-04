@@ -1,7 +1,8 @@
 from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
+from app.models.lead import LEAD_STATUSES
 from app.schemas.base import StandardReadFields, TZAwareDatetime
 
 
@@ -17,6 +18,13 @@ class LeadCreate(BaseModel):
     industry: str | None = None
     custom_fields: dict[str, Any] = {}
 
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, v: str) -> str:
+        if v not in LEAD_STATUSES:
+            raise ValueError(f"status must be one of: {', '.join(LEAD_STATUSES)}")
+        return v
+
 
 class LeadUpdate(BaseModel):
     last_name: str | None = None
@@ -29,6 +37,13 @@ class LeadUpdate(BaseModel):
     lead_source: str | None = None
     industry: str | None = None
     custom_fields: dict[str, Any] | None = None
+
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, v: str | None) -> str | None:
+        if v is not None and v not in LEAD_STATUSES:
+            raise ValueError(f"status must be one of: {', '.join(LEAD_STATUSES)}")
+        return v
 
 
 class LeadRead(StandardReadFields):

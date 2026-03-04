@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 from app.schemas.base import StandardReadFields
 
@@ -30,8 +30,10 @@ class UserRead(StandardReadFields):
     role_id: int | None = None
 
 
-class UserList(StandardReadFields):
-    """Lightweight user schema for list responses (no sensitive fields)."""
+class UserList(BaseModel):
+    """Lightweight user schema for list responses (no audit/metadata clutter)."""
+
+    model_config = ConfigDict(from_attributes=True)
 
     id: int
     email: str

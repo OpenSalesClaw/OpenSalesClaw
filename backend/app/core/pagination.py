@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
 from fastapi import Query
 from pydantic import BaseModel
@@ -28,3 +28,13 @@ class PaginatedResponse(BaseModel, Generic[T]):
     total: int
     offset: int
     limit: int
+
+    @classmethod
+    def from_result(
+        cls,
+        items: list[Any],
+        total: int,
+        pagination: "PaginationParams",
+    ) -> "PaginatedResponse[Any]":
+        """Convenience constructor from a (items, total) service result."""
+        return cls(items=items, total=total, offset=pagination.offset, limit=pagination.limit)

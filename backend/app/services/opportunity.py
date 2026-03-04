@@ -74,6 +74,9 @@ class OpportunityService(CRUDService[Opportunity, OpportunityCreate, Opportunity
             if "probability" not in data.model_fields_set:
                 updates["probability"] = DEFAULT_STAGE_PROBABILITIES.get(updates["stage"], 10)
 
+        if "custom_fields" in updates and updates["custom_fields"] is not None:
+            await self._validate_custom_fields(db, {"custom_fields": updates["custom_fields"]})
+
         for field, value in updates.items():
             setattr(record, field, value)
         record.updated_by_id = updated_by_id
@@ -99,10 +102,3 @@ class OpportunityService(CRUDService[Opportunity, OpportunityCreate, Opportunity
 
 
 opportunity_service = OpportunityService()
-
-get_opportunity_by_id = opportunity_service.get_by_id
-list_opportunities = opportunity_service.list
-create_opportunity = opportunity_service.create
-update_opportunity = opportunity_service.update
-delete_opportunity = opportunity_service.delete
-get_pipeline = opportunity_service.get_pipeline

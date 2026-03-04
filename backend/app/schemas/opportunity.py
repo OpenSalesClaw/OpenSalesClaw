@@ -5,7 +5,7 @@ from typing import Any
 from pydantic import BaseModel, field_validator
 
 from app.models.opportunity import OPPORTUNITY_STAGES
-from app.schemas.base import StandardReadFields
+from app.schemas.base import StandardReadFields, TZAwareDatetime
 
 
 class OpportunityCreate(BaseModel):
@@ -81,3 +81,4 @@ class OpportunityRead(StandardReadFields):
     description: str | None
     is_won: bool
     is_closed: bool
+    closed_at: TZAwareDatetime | None

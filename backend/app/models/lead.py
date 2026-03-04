@@ -25,3 +25,6 @@ class Lead(BaseEntity):
     converted_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
     converted_account_id: Mapped[int | None] = mapped_column(BigInteger, ForeignKey("accounts.id"), nullable=True)
     converted_contact_id: Mapped[int | None] = mapped_column(BigInteger, ForeignKey("contacts.id"), nullable=True)
+
+
+LEAD_STATUSES: list[str] = ["New", "Contacted", "Qualified", "Unqualified", "Converted"]

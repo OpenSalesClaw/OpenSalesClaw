@@ -3,10 +3,10 @@
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.case import Case
+from app.models.case import Case, case_number_seq
 from app.schemas.case import CaseCreate, CaseUpdate
 from app.services.base import CRUDService
 
@@ -14,16 +14,14 @@ _CLOSED_STATUS = "Closed"
 
 
 async def _generate_case_number(db: AsyncSession) -> str:
-    """Generate the next sequential case number in CS-NNNNN format."""
-    result = await db.execute(select(func.max(Case.case_number)).where(Case.case_number.is_not(None)))
-    max_number = result.scalar_one_or_none()
-    if max_number:
-        try:
-            seq = int(max_number.split("-")[1]) + 1
-        except (IndexError, ValueError):
-            seq = 1
-    else:
-        seq = 1
+    """Generate the next sequential case number using a PostgreSQL sequence.
+
+    Using a sequence instead of MAX()+1 eliminates the race condition where
+    two concurrent requests could read the same max value and produce duplicate
+    case numbers (which would then collide on the UNIQUE constraint → 500).
+    """
+    result = await db.execute(select(case_number_seq.next_value()))
+    seq = result.scalar_one()
     return f"CS-{seq:05d}"
 
 
@@ -49,8 +47,9 @@ class CaseService(CRUDService[Case, CaseCreate, CaseUpdate]):
         order_by: Any | None = None,
         **filters: Any,
     ) -> tuple[list[Case], int]:
-        # Default sort: created_at DESC
-        return await super().list(db, pagination, order_by=self.model.created_at.desc(), **filters)
+        # Default sort: created_at DESC; respect caller-supplied order_by.
+        order_by = order_by if order_by is not None else self.model.created_at.desc()
+        return await super().list(db, pagination, order_by=order_by, **filters)
 
     async def create(self, db: AsyncSession, data: CaseCreate, created_by_id: int | None = None) -> Case:
         payload = data.model_dump()
@@ -79,6 +78,9 @@ class CaseService(CRUDService[Case, CaseCreate, CaseUpdate]):
         record = await self.get_by_id(db, record_id)
         updates = data.model_dump(exclude_unset=True)
 
+        if "custom_fields" in updates and updates["custom_fields"] is not None:
+            await self._validate_custom_fields(db, {"custom_fields": updates["custom_fields"]})
+
         if "status" in updates:
             if updates["status"] == _CLOSED_STATUS and not record.closed_at:
                 updates["closed_at"] = datetime.now(UTC)
@@ -94,9 +96,3 @@ class CaseService(CRUDService[Case, CaseCreate, CaseUpdate]):
 
 
 case_service = CaseService()
-
-get_case_by_id = case_service.get_by_id
-list_cases = case_service.list
-create_case = case_service.create
-update_case = case_service.update
-delete_case = case_service.delete

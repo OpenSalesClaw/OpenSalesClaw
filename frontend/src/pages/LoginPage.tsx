@@ -1,6 +1,10 @@
 import { type FormEvent, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../stores/authStore'
+import { Button } from '../components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import { Input } from '../components/ui/input'
+import { Label } from '../components/ui/label'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -26,132 +30,48 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>OpenSalesClaw</h1>
-        <p style={styles.subtitle}>Sign in to your account</p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <Card className="w-full max-w-sm shadow-md">
+        <CardHeader className="text-center pb-2">
+          <CardTitle className="text-2xl font-bold">OpenSalesClaw</CardTitle>
+          <p className="text-sm text-muted-foreground mt-1">Sign in to your account</p>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={(e) => void handleSubmit(e)} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+              />
+            </div>
 
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.field}>
-            <label htmlFor="email" style={styles.label}>
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={styles.input}
-              placeholder="you@example.com"
-            />
-          </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+              />
+            </div>
 
-          <div style={styles.field}>
-            <label htmlFor="password" style={styles.label}>
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={styles.input}
-              placeholder="••••••••"
-            />
-          </div>
+            {error && <p className="text-sm text-destructive">{error}</p>}
 
-          {error && <p style={styles.error}>{error}</p>}
-
-          <button type="submit" disabled={loading} style={loading ? styles.buttonDisabled : styles.button}>
-            {loading ? 'Signing in…' : 'Sign in'}
-          </button>
-        </form>
-      </div>
+            <Button type="submit" disabled={loading} className="mt-1 w-full">
+              {loading ? 'Signing in…' : 'Sign in'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   )
-}
-
-const styles: Record<string, React.CSSProperties> = {
-  container: {
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f3f4f6',
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
-    padding: '2.5rem 2rem',
-    width: '100%',
-    maxWidth: 400,
-  },
-  title: {
-    margin: '0 0 0.25rem',
-    fontSize: '1.5rem',
-    fontWeight: 700,
-    color: '#111827',
-    textAlign: 'center',
-  },
-  subtitle: {
-    margin: '0 0 1.75rem',
-    fontSize: '0.875rem',
-    color: '#6b7280',
-    textAlign: 'center',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem',
-  },
-  field: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 4,
-  },
-  label: {
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    color: '#374151',
-  },
-  input: {
-    padding: '0.5rem 0.75rem',
-    border: '1px solid #d1d5db',
-    borderRadius: 6,
-    fontSize: '0.9375rem',
-    outline: 'none',
-    color: '#111827',
-  },
-  button: {
-    marginTop: '0.5rem',
-    padding: '0.625rem',
-    backgroundColor: '#2563eb',
-    color: '#fff',
-    border: 'none',
-    borderRadius: 6,
-    fontSize: '0.9375rem',
-    fontWeight: 600,
-    cursor: 'pointer',
-  },
-  buttonDisabled: {
-    marginTop: '0.5rem',
-    padding: '0.625rem',
-    backgroundColor: '#93c5fd',
-    color: '#fff',
-    border: 'none',
-    borderRadius: 6,
-    fontSize: '0.9375rem',
-    fontWeight: 600,
-    cursor: 'not-allowed',
-  },
-  error: {
-    fontSize: '0.875rem',
-    color: '#dc2626',
-    margin: 0,
-  },
 }

@@ -9,7 +9,7 @@ from app.core.dependencies import get_current_active_user
 from app.core.security import create_access_token
 from app.models.user import User
 from app.schemas.user import UserCreate, UserRead
-from app.services import user as user_service
+from app.services.user import user_service
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -20,8 +20,7 @@ async def register(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> UserRead:
     """Register a new user account."""
-    user = await user_service.create_user(db, data)
-    return user  # type: ignore[return-value]
+    return UserRead.model_validate(await user_service.create(db, data))
 
 
 @router.post("/login")
@@ -30,7 +29,7 @@ async def login(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> dict[str, Any]:
     """Authenticate with email + password and return an access token."""
-    user = await user_service.authenticate_user(db, form_data.username, form_data.password)
+    user = await user_service.authenticate(db, form_data.username, form_data.password)
     token = create_access_token(subject=str(user.id))
     return {"access_token": token, "token_type": "bearer"}
 
@@ -40,4 +39,4 @@ async def me(
     current_user: Annotated[User, Depends(get_current_active_user)],
 ) -> UserRead:
     """Return the authenticated user's profile."""
-    return current_user  # type: ignore[return-value]
+    return UserRead.model_validate(current_user)

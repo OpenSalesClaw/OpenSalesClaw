@@ -9,7 +9,7 @@ from app.core.dependencies import get_current_active_user
 from app.core.pagination import PaginatedResponse, PaginationParams
 from app.models.user import User
 from app.schemas.opportunity import OpportunityCreate, OpportunityRead, OpportunityUpdate
-from app.services import opportunity as opportunity_service
+from app.services.opportunity import opportunity_service
 
 router = APIRouter(prefix="/api/opportunities", tags=["opportunities"])
 
@@ -24,8 +24,9 @@ async def list_opportunities(
     is_closed: bool | None = Query(default=None, description="Filter by closed status"),
     close_date_from: date | None = Query(default=None, description="Filter by close date (from)"),
     close_date_to: date | None = Query(default=None, description="Filter by close date (to)"),
+    owner_id: int | None = Query(default=None, description="Filter by owner ID"),
 ) -> PaginatedResponse[OpportunityRead]:
-    items, total = await opportunity_service.list_opportunities(
+    items, total = await opportunity_service.list(
         db,
         pagination,
         account_id=account_id,
@@ -33,8 +34,9 @@ async def list_opportunities(
         is_closed=is_closed,
         close_date_from=close_date_from,
         close_date_to=close_date_to,
+        owner_id=owner_id,
     )
-    return PaginatedResponse(items=items, total=total, offset=pagination.offset, limit=pagination.limit)  # type: ignore[arg-type]
+    return PaginatedResponse.from_result([OpportunityRead.model_validate(i) for i in items], total, pagination)
 
 
 @router.get("/pipeline", response_model=list[dict[str, Any]])
@@ -51,7 +53,7 @@ async def get_opportunity(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_active_user)],
 ) -> OpportunityRead:
-    return await opportunity_service.get_opportunity_by_id(db, opportunity_id)  # type: ignore[return-value]
+    return OpportunityRead.model_validate(await opportunity_service.get_by_id(db, opportunity_id))
 
 
 @router.post("", response_model=OpportunityRead, status_code=status.HTTP_201_CREATED)
@@ -60,7 +62,7 @@ async def create_opportunity(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_active_user)],
 ) -> OpportunityRead:
-    return await opportunity_service.create_opportunity(db, data, created_by_id=current_user.id)  # type: ignore[return-value]
+    return OpportunityRead.model_validate(await opportunity_service.create(db, data, created_by_id=current_user.id))
 
 
 @router.patch("/{opportunity_id}", response_model=OpportunityRead)
@@ -70,7 +72,9 @@ async def update_opportunity(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_active_user)],
 ) -> OpportunityRead:
-    return await opportunity_service.update_opportunity(db, opportunity_id, data, updated_by_id=current_user.id)  # type: ignore[return-value]
+    return OpportunityRead.model_validate(
+        await opportunity_service.update(db, opportunity_id, data, updated_by_id=current_user.id)
+    )
 
 
 @router.delete("/{opportunity_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -79,4 +83,4 @@ async def delete_opportunity(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_active_user)],
 ) -> None:
-    await opportunity_service.delete_opportunity(db, opportunity_id, deleted_by_id=current_user.id)
+    await opportunity_service.delete(db, opportunity_id, deleted_by_id=current_user.id)

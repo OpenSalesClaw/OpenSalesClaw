@@ -2,12 +2,13 @@
 
 from typing import Any
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import ConflictError
 from app.models.role import Role
 from app.schemas.role import RoleCreate, RoleUpdate
-from app.services.base import CRUDService
+from app.services.base import CRUDService, escape_like
 
 
 class RoleService(CRUDService[Role, RoleCreate, RoleUpdate]):
@@ -15,7 +16,7 @@ class RoleService(CRUDService[Role, RoleCreate, RoleUpdate]):
 
     def apply_list_filters(self, query: Any, **filters: Any) -> Any:
         if name := filters.get("name"):
-            query = query.where(Role.name.ilike(f"%{name}%"))
+            query = query.where(Role.name.ilike(f"%{escape_like(name)}%", escape="\\"))
         return query
 
     async def create(self, db: AsyncSession, data: RoleCreate, created_by_id: int | None = None) -> Role:
@@ -48,7 +49,8 @@ class RoleService(CRUDService[Role, RoleCreate, RoleUpdate]):
 
     async def get_hierarchy(self, db: AsyncSession) -> list[dict[str, Any]]:
         """Return all roles as a flat list with parent info for tree construction."""
-        items, _ = await self.list(db, type("P", (), {"offset": 0, "limit": 1000})())
+        result = await db.execute(select(Role).where(Role.is_deleted.is_(False)).order_by(Role.id))
+        roles = list(result.scalars().all())
         return [
             {
                 "id": role.id,
@@ -56,15 +58,8 @@ class RoleService(CRUDService[Role, RoleCreate, RoleUpdate]):
                 "parent_role_id": role.parent_role_id,
                 "description": role.description,
             }
-            for role in items
+            for role in roles
         ]
 
 
 role_service = RoleService()
-
-get_role_by_id = role_service.get_by_id
-list_roles = role_service.list
-create_role = role_service.create
-update_role = role_service.update
-delete_role = role_service.delete
-get_role_hierarchy = role_service.get_hierarchy

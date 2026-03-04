@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { useAuthStore } from '../stores/authStore'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
 
@@ -27,13 +28,13 @@ apiClient.interceptors.request.use((config) => {
   return config
 })
 
-// On 401 responses redirect to login
+// On 401 responses clear auth state and redirect to login
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('auth-storage')
-      window.location.href = '/login'
+      useAuthStore.getState().logout()
+      window.location.replace('/login')
     }
     return Promise.reject(error)
   },
