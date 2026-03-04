@@ -107,10 +107,8 @@ cp .env.example .env
 # Edit .env and set a strong SECRET_KEY
 
 # Start the full stack (database, backend, frontend, Traefik)
+# Migrations run automatically on backend startup via entrypoint.sh
 docker compose up -d
-
-# Run database migrations
-docker compose exec backend alembic upgrade head
 ```
 
 | Service | URL |
