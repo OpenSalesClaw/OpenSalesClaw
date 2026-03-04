@@ -64,9 +64,7 @@ class CRUDService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """Override in subclasses to apply entity-specific filters."""
         return query
 
-    async def create(
-        self, db: AsyncSession, data: CreateSchemaType, created_by_id: int | None = None
-    ) -> ModelType:
+    async def create(self, db: AsyncSession, data: CreateSchemaType, created_by_id: int | None = None) -> ModelType:
         record = self.model(
             **data.model_dump(),
             created_by_id=created_by_id,

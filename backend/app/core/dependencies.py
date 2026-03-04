@@ -32,9 +32,7 @@ async def get_current_user(
     except (JWTError, ValueError):
         raise credentials_exception
 
-    result = await db.execute(
-        select(User).where(User.id == user_id, User.is_deleted.is_(False))
-    )
+    result = await db.execute(select(User).where(User.id == user_id, User.is_deleted.is_(False)))
     user = result.scalars().first()
     if user is None:
         raise credentials_exception
