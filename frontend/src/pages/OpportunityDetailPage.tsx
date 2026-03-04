@@ -165,23 +165,22 @@ export default function OpportunityDetailPage() {
         <CardHeader><CardTitle>Opportunity Details</CardTitle></CardHeader>
         <CardContent>
           {editing ? (
-            <>
-              <RecordForm
-                fields={formFields}
-                values={formValues}
-                onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
-                onSubmit={handleSave}
-                onCancel={() => { setEditing(false); setCustomFields(opp.custom_fields ?? {}) }}
-                submitLabel="Save Changes"
-                loading={saveLoading}
-                error={saveError}
-              />
+            <RecordForm
+              fields={formFields}
+              values={formValues}
+              onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
+              onSubmit={handleSave}
+              onCancel={() => { setEditing(false); setCustomFields(opp.custom_fields ?? {}) }}
+              submitLabel="Save Changes"
+              loading={saveLoading}
+              error={saveError}
+            >
               <DynamicFieldsSection
                 objectName="opportunities"
                 values={customFields}
                 onChange={setCustomFields}
               />
-            </>
+            </RecordForm>
           ) : (
             <>
               <DetailView record={opp as unknown as Record<string, unknown>} fields={detailFields} />

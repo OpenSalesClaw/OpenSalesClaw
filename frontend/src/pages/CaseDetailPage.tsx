@@ -158,23 +158,22 @@ export default function CaseDetailPage() {
         <CardHeader><CardTitle>Case Details</CardTitle></CardHeader>
         <CardContent>
           {editing ? (
-            <>
-              <RecordForm
-                fields={formFields}
-                values={formValues}
-                onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
-                onSubmit={handleSave}
-                onCancel={() => { setEditing(false); setCustomFields(caseRecord.custom_fields ?? {}) }}
-                submitLabel="Save Changes"
-                loading={saveLoading}
-                error={saveError}
-              />
+            <RecordForm
+              fields={formFields}
+              values={formValues}
+              onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
+              onSubmit={handleSave}
+              onCancel={() => { setEditing(false); setCustomFields(caseRecord.custom_fields ?? {}) }}
+              submitLabel="Save Changes"
+              loading={saveLoading}
+              error={saveError}
+            >
               <DynamicFieldsSection
                 objectName="cases"
                 values={customFields}
                 onChange={setCustomFields}
               />
-            </>
+            </RecordForm>
           ) : (
             <>
               <DetailView record={caseRecord as unknown as Record<string, unknown>} fields={detailFields} />

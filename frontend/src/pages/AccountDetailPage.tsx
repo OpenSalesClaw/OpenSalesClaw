@@ -234,23 +234,22 @@ export default function AccountDetailPage() {
         </CardHeader>
         <CardContent>
           {editing ? (
-            <>
-              <RecordForm
-                fields={EDIT_FIELDS}
-                values={formValues}
-                onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
-                onSubmit={handleSave}
-                onCancel={() => { setEditing(false); setCustomFields(account.custom_fields ?? {}) }}
-                submitLabel="Save Changes"
-                loading={saveLoading}
-                error={saveError}
-              />
+            <RecordForm
+              fields={EDIT_FIELDS}
+              values={formValues}
+              onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
+              onSubmit={handleSave}
+              onCancel={() => { setEditing(false); setCustomFields(account.custom_fields ?? {}) }}
+              submitLabel="Save Changes"
+              loading={saveLoading}
+              error={saveError}
+            >
               <DynamicFieldsSection
                 objectName="accounts"
                 values={customFields}
                 onChange={setCustomFields}
               />
-            </>
+            </RecordForm>
           ) : (
             <>
               <DetailView record={account as unknown as Record<string, unknown>} fields={DETAIL_FIELDS} />

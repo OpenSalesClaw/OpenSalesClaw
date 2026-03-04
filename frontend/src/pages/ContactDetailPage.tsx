@@ -175,23 +175,22 @@ export default function ContactDetailPage() {
         </CardHeader>
         <CardContent>
           {editing ? (
-            <>
-              <RecordForm
-                fields={formFields}
-                values={formValues}
-                onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
-                onSubmit={handleSave}
-                onCancel={() => { setEditing(false); setCustomFields(contact.custom_fields ?? {}) }}
-                submitLabel="Save Changes"
-                loading={saveLoading}
-                error={saveError}
-              />
+            <RecordForm
+              fields={formFields}
+              values={formValues}
+              onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
+              onSubmit={handleSave}
+              onCancel={() => { setEditing(false); setCustomFields(contact.custom_fields ?? {}) }}
+              submitLabel="Save Changes"
+              loading={saveLoading}
+              error={saveError}
+            >
               <DynamicFieldsSection
                 objectName="contacts"
                 values={customFields}
                 onChange={setCustomFields}
               />
-            </>
+            </RecordForm>
           ) : (
             <>
               <DetailView record={contact as unknown as Record<string, unknown>} fields={detailFields} />

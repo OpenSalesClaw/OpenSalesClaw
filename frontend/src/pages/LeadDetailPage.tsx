@@ -176,23 +176,22 @@ export default function LeadDetailPage() {
         </CardHeader>
         <CardContent>
           {editing ? (
-            <>
-              <RecordForm
-                fields={FORM_FIELDS}
-                values={formValues}
-                onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
-                onSubmit={handleSave}
-                onCancel={() => { setEditing(false); setCustomFields(lead.custom_fields ?? {}) }}
-                submitLabel="Save Changes"
-                loading={saveLoading}
-                error={saveError}
-              />
+            <RecordForm
+              fields={FORM_FIELDS}
+              values={formValues}
+              onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
+              onSubmit={handleSave}
+              onCancel={() => { setEditing(false); setCustomFields(lead.custom_fields ?? {}) }}
+              submitLabel="Save Changes"
+              loading={saveLoading}
+              error={saveError}
+            >
               <DynamicFieldsSection
                 objectName="leads"
                 values={customFields}
                 onChange={setCustomFields}
               />
-            </>
+            </RecordForm>
           ) : (
             <>
               <DetailView record={lead as unknown as Record<string, unknown>} fields={DETAIL_FIELDS} />
