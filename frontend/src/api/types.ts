@@ -210,3 +210,68 @@ export interface CaseCreate {
 }
 
 export type CaseUpdate = Partial<CaseCreate>
+
+// ---------------------------------------------------------------------------
+// User
+// ---------------------------------------------------------------------------
+
+export interface User extends StandardFields {
+  email: string
+  first_name: string | null
+  last_name: string | null
+  is_active: boolean
+  is_superuser: boolean
+  role_id: number | null
+}
+
+export interface UserList {
+  id: number
+  email: string
+  first_name: string | null
+  last_name: string | null
+  is_active: boolean
+  is_superuser: boolean
+  role_id: number | null
+}
+
+export interface AdminUserCreate {
+  email: string
+  password: string
+  first_name?: string | null
+  last_name?: string | null
+  is_active?: boolean
+  is_superuser?: boolean
+  role_id?: number | null
+}
+
+export type UserUpdate = Partial<AdminUserCreate>
+
+export interface PasswordReset {
+  new_password: string
+}
+
+// ---------------------------------------------------------------------------
+// Role
+// ---------------------------------------------------------------------------
+
+export interface Role extends StandardFields {
+  name: string
+  description: string | null
+  parent_role_id: number | null
+}
+
+export interface RoleList {
+  id: number
+  name: string
+  description: string | null
+  parent_role_id: number | null
+}
+
+export interface RoleCreate {
+  name: string
+  description?: string | null
+  parent_role_id?: number | null
+  custom_fields?: Record<string, unknown>
+}
+
+export type RoleUpdate = Partial<RoleCreate>

@@ -1,9 +1,10 @@
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.dependencies import get_current_active_user
 from app.core.security import create_access_token
@@ -19,7 +20,12 @@ async def register(
     data: UserCreate,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> UserRead:
-    """Register a new user account."""
+    """Register a new user account. Disabled when ALLOW_PUBLIC_REGISTRATION=false."""
+    if not settings.allow_public_registration:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Public registration is disabled. Contact an administrator to create an account.",
+        )
     return UserRead.model_validate(await user_service.create(db, data))
 
 

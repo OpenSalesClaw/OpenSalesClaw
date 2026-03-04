@@ -255,6 +255,9 @@
 | F-SEC-022 | Data Encryption at Rest | Encrypt sensitive columns (PII) in the database | P2 | Not Started |
 | F-SEC-023 | TLS / HTTPS Enforcement | Require encrypted connections for all traffic | P1 | Not Started |
 | F-SEC-024 | Rate Limiting | Per-user and per-IP request rate limits | P1 | Not Started |
+| F-SEC-025 | Admin User Management UI | Superuser-only admin panel: paginated user list with email/status filters, create user (email, password, role, is_active, is_superuser), edit, admin-initiated password reset, soft-delete; self-protection guards block deactivating or deleting one's own account | P1 | Done |
+| F-SEC-026 | Admin Role Management UI | Superuser-only admin panel: role hierarchy tree view with expand/collapse nodes, create/edit/delete roles, child roles list, assigned users list | P1 | Done |
+| F-SEC-027 | Public Registration Control | `ALLOW_PUBLIC_REGISTRATION` config flag; when `false`, `POST /api/auth/register` returns 403 and new users must be created by a superuser via `POST /api/users` | P1 | Done |
 
 ---
 
@@ -402,6 +405,7 @@
 | T-ARCH-013 | Graceful Shutdown | Handle SIGTERM cleanly; drain connections before exit | P1 | Not Started |
 | T-ARCH-014 | Feature Flags | Toggle features on/off without redeployment | P3 | Not Started |
 | T-ARCH-015 | Plugin Architecture | Extensible hook system for custom business logic | P3 | Not Started |
+| T-ARCH-016 | Separate Admin Shell | Distinct `/admin` area with its own `AdminLayout` sidebar (Back-to-CRM link, extensible nav), `AdminRoute` superuser guard (redirects non-admins to `/`), and `AdminPageRoute` wrapper; fully isolated from main CRM routing | MVP | Done |
 
 ---
 
@@ -540,8 +544,8 @@
 
 | Priority | Count |
 |----------|-------|
-| **MVP**  | 34    |
-| **P1**   | 66    |
+| **MVP**  | 35    |
+| **P1**   | 69    |
 | **P2**   | 72    |
 | **P3**   | 57    |
-| **Total**| **229** |
+| **Total**| **233** |

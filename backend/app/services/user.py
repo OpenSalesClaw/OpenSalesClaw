@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.exceptions import AuthenticationError, ConflictError
 from app.core.security import hash_password, verify_password
 from app.models.user import User
-from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.user import AdminUserCreate, UserCreate, UserUpdate
 from app.services.base import CRUDService, escape_like
 
 
@@ -51,6 +51,38 @@ class UserService(CRUDService[User, UserCreate, UserUpdate]):
             updated_by_id=created_by_id,
         )
         db.add(record)
+        await db.flush()
+        await db.refresh(record)
+        return record
+
+    async def create_admin_user(
+        self, db: AsyncSession, data: AdminUserCreate, created_by_id: int | None = None
+    ) -> User:
+        """Create a user from the admin panel (allows setting is_superuser, is_active, role_id)."""
+        existing = await self.get_by_email(db, data.email)
+        if existing:
+            raise ConflictError(f"A user with email '{data.email}' already exists.")
+
+        payload = data.model_dump()
+        payload["hashed_password"] = hash_password(payload.pop("password"))
+
+        record = User(
+            **payload,
+            created_by_id=created_by_id,
+            updated_by_id=created_by_id,
+        )
+        db.add(record)
+        await db.flush()
+        await db.refresh(record)
+        return record
+
+    async def reset_password(
+        self, db: AsyncSession, record_id: int, new_password: str, updated_by_id: int | None = None
+    ) -> User:
+        """Admin-initiated password reset — no old password required."""
+        record = await self.get_by_id(db, record_id)
+        record.hashed_password = hash_password(new_password)
+        record.updated_by_id = updated_by_id
         await db.flush()
         await db.refresh(record)
         return record

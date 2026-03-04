@@ -135,5 +135,143 @@ async def test_delete_user_not_found(client: AsyncClient, superuser_headers: dic
 
 
 # ---------------------------------------------------------------------------
+# Admin create user (POST /api/users)
+# ---------------------------------------------------------------------------
+
+
+async def test_admin_create_user(client: AsyncClient, superuser_headers: dict[str, str]) -> None:
+    resp = await client.post(
+        "/api/users",
+        json={"email": "newadmin@example.com", "password": "securepass1", "first_name": "New", "last_name": "User"},
+        headers=superuser_headers,
+    )
+    assert resp.status_code == 201
+    data = resp.json()
+    assert data["email"] == "newadmin@example.com"
+    assert data["first_name"] == "New"
+    assert data["is_active"] is True
+    assert data["is_superuser"] is False
+
+
+async def test_admin_create_superuser(client: AsyncClient, superuser_headers: dict[str, str]) -> None:
+    resp = await client.post(
+        "/api/users",
+        json={"email": "newsuper@example.com", "password": "securepass1", "is_superuser": True},
+        headers=superuser_headers,
+    )
+    assert resp.status_code == 201
+    assert resp.json()["is_superuser"] is True
+
+
+async def test_admin_create_user_duplicate_email(client: AsyncClient, superuser_headers: dict[str, str]) -> None:
+    payload = {"email": "dupuser@example.com", "password": "securepass1"}
+    await client.post("/api/users", json=payload, headers=superuser_headers)
+    resp = await client.post("/api/users", json=payload, headers=superuser_headers)
+    assert resp.status_code == 409
+
+
+async def test_admin_create_user_non_admin_gets_403(client: AsyncClient, auth_headers: dict[str, str]) -> None:
+    resp = await client.post(
+        "/api/users",
+        json={"email": "blocked@example.com", "password": "securepass1"},
+        headers=auth_headers,
+    )
+    assert resp.status_code == 403
+
+
+async def test_admin_create_user_requires_auth(client: AsyncClient) -> None:
+    resp = await client.post("/api/users", json={"email": "x@example.com", "password": "securepass1"})
+    assert resp.status_code == 401
+
+
+async def test_admin_create_user_weak_password(client: AsyncClient, superuser_headers: dict[str, str]) -> None:
+    resp = await client.post(
+        "/api/users",
+        json={"email": "weak@example.com", "password": "short"},
+        headers=superuser_headers,
+    )
+    assert resp.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# Password reset (PATCH /api/users/{id}/reset-password)
+# ---------------------------------------------------------------------------
+
+
+async def test_reset_user_password(client: AsyncClient, superuser_headers: dict[str, str]) -> None:
+    reg = await client.post(
+        "/api/auth/register",
+        json={"email": "resetme@example.com", "password": "oldpassword"},
+    )
+    user_id = reg.json()["id"]
+
+    resp = await client.patch(
+        f"/api/users/{user_id}/reset-password",
+        json={"new_password": "newpassword99"},
+        headers=superuser_headers,
+    )
+    assert resp.status_code == 200
+    assert resp.json()["id"] == user_id
+
+    # Can now log in with the new password
+    login = await client.post(
+        "/api/auth/login",
+        data={"username": "resetme@example.com", "password": "newpassword99"},
+    )
+    assert login.status_code == 200
+
+
+async def test_reset_password_non_admin_gets_403(client: AsyncClient, auth_headers: dict[str, str]) -> None:
+    me_resp = await client.get("/api/auth/me", headers=auth_headers)
+    user_id = me_resp.json()["id"]
+    resp = await client.patch(
+        f"/api/users/{user_id}/reset-password",
+        json={"new_password": "newpassword99"},
+        headers=auth_headers,
+    )
+    assert resp.status_code == 403
+
+
+async def test_reset_password_weak_password(client: AsyncClient, superuser_headers: dict[str, str]) -> None:
+    reg = await client.post(
+        "/api/auth/register",
+        json={"email": "weakreset@example.com", "password": "pass1234"},
+    )
+    user_id = reg.json()["id"]
+    resp = await client.patch(
+        f"/api/users/{user_id}/reset-password",
+        json={"new_password": "weak"},
+        headers=superuser_headers,
+    )
+    assert resp.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# Self-deletion / self-deactivation guards
+# ---------------------------------------------------------------------------
+
+
+async def test_delete_own_account_gets_400(client: AsyncClient, superuser_headers: dict[str, str]) -> None:
+    me_resp = await client.get("/api/auth/me", headers=superuser_headers)
+    user_id = me_resp.json()["id"]
+    resp = await client.delete(f"/api/users/{user_id}", headers=superuser_headers)
+    assert resp.status_code == 400
+
+
+async def test_deactivate_own_account_gets_400(client: AsyncClient, superuser_headers: dict[str, str]) -> None:
+    me_resp = await client.get("/api/auth/me", headers=superuser_headers)
+    user_id = me_resp.json()["id"]
+    resp = await client.patch(f"/api/users/{user_id}", json={"is_active": False}, headers=superuser_headers)
+    assert resp.status_code == 400
+
+
+async def test_remove_own_superuser_gets_400(client: AsyncClient, superuser_headers: dict[str, str]) -> None:
+    me_resp = await client.get("/api/auth/me", headers=superuser_headers)
+    user_id = me_resp.json()["id"]
+    resp = await client.patch(f"/api/users/{user_id}", json={"is_superuser": False}, headers=superuser_headers)
+    assert resp.status_code == 400
+
+
+# ---------------------------------------------------------------------------
 # Docstring only - /users/me removed; use /api/auth/me instead
 # ---------------------------------------------------------------------------

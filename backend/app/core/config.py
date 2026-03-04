@@ -23,6 +23,13 @@ class Settings(BaseSettings):
     default_admin_password: str = "admin"
     seed_demo_data: bool = False
 
+    # ---------------------------------------------------------------------------
+    # Registration
+    # ---------------------------------------------------------------------------
+    # Set to False to disable the open /api/auth/register endpoint. When
+    # disabled, new users must be created by a superuser via POST /api/users.
+    allow_public_registration: bool = True
+
     @property
     def cors_origins_list(self) -> list[str]:
         """Parse *cors_origins* into a list of origin strings.
