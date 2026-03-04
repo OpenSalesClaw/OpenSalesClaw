@@ -1,6 +1,8 @@
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { accountsApi } from '@/api/accounts'
 import { contactsApi } from '@/api/contacts'
-import type { Contact, ContactCreate } from '@/api/types'
+import type { Account, Contact, ContactCreate } from '@/api/types'
 import DataTable, { type Column } from '@/components/DataTable'
 import FilterBar from '@/components/FilterBar'
 import RecordForm from '@/components/RecordForm'
@@ -9,27 +11,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useEntityCRUD } from '@/lib/hooks/useEntityCRUD'
 
 const PAGE_SIZE = 20
-
-const COLUMNS: Column<Contact>[] = [
-  {
-    key: 'name',
-    label: 'Name',
-    render: (r) => `${r.first_name ?? ''} ${r.last_name}`.trim(),
-  },
-  { key: 'email', label: 'Email' },
-  { key: 'phone', label: 'Phone' },
-  { key: 'account_id', label: 'Account ID' },
-  { key: 'title', label: 'Title' },
-]
-
-const FORM_FIELDS = [
-  { key: 'last_name', label: 'Last Name', required: true, placeholder: 'Smith' },
-  { key: 'first_name', label: 'First Name', placeholder: 'Jane' },
-  { key: 'email', label: 'Email', type: 'email' as const, placeholder: 'jane@example.com' },
-  { key: 'phone', label: 'Phone', type: 'tel' as const, placeholder: '+1 555-000-0000' },
-  { key: 'title', label: 'Title', placeholder: 'VP Sales' },
-  { key: 'account_id', label: 'Account ID', type: 'number' as const, placeholder: '1' },
-]
 
 function buildListParams(f: Record<string, string>) {
   return f.email ? { email: f.email } : {}
@@ -48,6 +29,42 @@ function buildCreatePayload(f: Record<string, string>): ContactCreate {
 
 export default function ContactsPage() {
   const navigate = useNavigate()
+  const [accounts, setAccounts] = useState<Account[]>([])
+
+  useEffect(() => {
+    void accountsApi.list({ limit: 200 }).then((res) => setAccounts(res.items))
+  }, [])
+
+  const accountMap = useMemo(() => new Map(accounts.map((a) => [a.id, a.name])), [accounts])
+  const accountOptions = useMemo(() => accounts.map((a) => ({ value: String(a.id), label: a.name })), [accounts])
+
+  const columns = useMemo<Column<Contact>[]>(
+    () => [
+      { key: 'name', label: 'Name', render: (r) => `${r.first_name ?? ''} ${r.last_name}`.trim() },
+      { key: 'email', label: 'Email' },
+      { key: 'phone', label: 'Phone' },
+      {
+        key: 'account_id',
+        label: 'Account',
+        render: (r) => (r.account_id != null ? (accountMap.get(r.account_id) ?? String(r.account_id)) : '—'),
+      },
+      { key: 'title', label: 'Title' },
+    ],
+    [accountMap],
+  )
+
+  const formFields = useMemo(
+    () => [
+      { key: 'last_name', label: 'Last Name', required: true, placeholder: 'Smith' },
+      { key: 'first_name', label: 'First Name', placeholder: 'Jane' },
+      { key: 'email', label: 'Email', type: 'email' as const, placeholder: 'jane@example.com' },
+      { key: 'phone', label: 'Phone', type: 'tel' as const, placeholder: '+1 555-000-0000' },
+      { key: 'title', label: 'Title', placeholder: 'VP Sales' },
+      { key: 'account_id', label: 'Account', type: 'combobox' as const, options: accountOptions, placeholder: 'Search accounts…' },
+    ],
+    [accountOptions],
+  )
+
   const crud = useEntityCRUD<Contact, ContactCreate>({
     api: contactsApi,
     pageSize: PAGE_SIZE,
@@ -71,7 +88,7 @@ export default function ContactsPage() {
       />
 
       <DataTable
-        columns={COLUMNS}
+        columns={columns}
         data={crud.items}
         loading={crud.loading}
         total={crud.total}
@@ -87,7 +104,7 @@ export default function ContactsPage() {
             <DialogTitle>New Contact</DialogTitle>
           </DialogHeader>
           <RecordForm
-            fields={FORM_FIELDS}
+            fields={formFields}
             values={crud.formValues}
             onChange={crud.setFormValue}
             onSubmit={() => void crud.handleCreate()}

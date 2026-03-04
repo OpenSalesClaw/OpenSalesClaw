@@ -1,41 +1,13 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { accountsApi } from '@/api/accounts'
 import { contactsApi } from '@/api/contacts'
-import type { Contact, ContactUpdate } from '@/api/types'
+import type { Account, Contact, ContactUpdate } from '@/api/types'
 import DeleteConfirmDialog from '@/components/DeleteConfirmDialog'
 import DetailView, { type FieldDefinition } from '@/components/DetailView'
 import RecordForm from '@/components/RecordForm'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-
-const DETAIL_FIELDS: FieldDefinition[] = [
-  { key: 'first_name', label: 'First Name' },
-  { key: 'last_name', label: 'Last Name' },
-  { key: 'email', label: 'Email' },
-  { key: 'phone', label: 'Phone' },
-  { key: 'mobile_phone', label: 'Mobile' },
-  { key: 'title', label: 'Title' },
-  { key: 'department', label: 'Department' },
-  { key: 'account_id', label: 'Account ID' },
-  { key: 'lead_source', label: 'Lead Source' },
-  { key: 'mailing_city', label: 'City' },
-  { key: 'mailing_country', label: 'Country' },
-  { key: 'created_at', label: 'Created At' },
-  { key: 'updated_at', label: 'Updated At' },
-]
-
-const FORM_FIELDS = [
-  { key: 'last_name', label: 'Last Name', required: true },
-  { key: 'first_name', label: 'First Name' },
-  { key: 'email', label: 'Email', type: 'email' as const },
-  { key: 'phone', label: 'Phone', type: 'tel' as const },
-  { key: 'mobile_phone', label: 'Mobile', type: 'tel' as const },
-  { key: 'title', label: 'Title' },
-  { key: 'department', label: 'Department' },
-  { key: 'account_id', label: 'Account ID', type: 'number' as const },
-  { key: 'mailing_city', label: 'Mailing City' },
-  { key: 'mailing_country', label: 'Mailing Country' },
-]
 
 export default function ContactDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -49,6 +21,53 @@ export default function ContactDetailPage() {
   const [saveError, setSaveError] = useState<string | null>(null)
   const [showDelete, setShowDelete] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [accounts, setAccounts] = useState<Account[]>([])
+
+  useEffect(() => {
+    void accountsApi.list({ limit: 200 }).then((res) => setAccounts(res.items))
+  }, [])
+
+  const accountMap = useMemo(() => new Map(accounts.map((a) => [a.id, a.name])), [accounts])
+  const accountOptions = useMemo(() => accounts.map((a) => ({ value: String(a.id), label: a.name })), [accounts])
+
+  const detailFields = useMemo<FieldDefinition[]>(
+    () => [
+      { key: 'first_name', label: 'First Name' },
+      { key: 'last_name', label: 'Last Name' },
+      { key: 'email', label: 'Email' },
+      { key: 'phone', label: 'Phone' },
+      { key: 'mobile_phone', label: 'Mobile' },
+      { key: 'title', label: 'Title' },
+      { key: 'department', label: 'Department' },
+      {
+        key: 'account_id',
+        label: 'Account',
+        format: (v) => (v != null ? (accountMap.get(Number(v)) ?? String(v)) : '—'),
+      },
+      { key: 'lead_source', label: 'Lead Source' },
+      { key: 'mailing_city', label: 'City' },
+      { key: 'mailing_country', label: 'Country' },
+      { key: 'created_at', label: 'Created At' },
+      { key: 'updated_at', label: 'Updated At' },
+    ],
+    [accountMap],
+  )
+
+  const formFields = useMemo(
+    () => [
+      { key: 'last_name', label: 'Last Name', required: true },
+      { key: 'first_name', label: 'First Name' },
+      { key: 'email', label: 'Email', type: 'email' as const },
+      { key: 'phone', label: 'Phone', type: 'tel' as const },
+      { key: 'mobile_phone', label: 'Mobile', type: 'tel' as const },
+      { key: 'title', label: 'Title' },
+      { key: 'department', label: 'Department' },
+      { key: 'account_id', label: 'Account', type: 'combobox' as const, options: accountOptions, placeholder: 'Search accounts…' },
+      { key: 'mailing_city', label: 'Mailing City' },
+      { key: 'mailing_country', label: 'Mailing Country' },
+    ],
+    [accountOptions],
+  )
 
   const load = useCallback(async () => {
     if (!id) return
@@ -71,7 +90,7 @@ export default function ContactDetailPage() {
     if (!contact) return
     setFormValues(
       Object.fromEntries(
-        FORM_FIELDS.map((f) => [f.key, contact[f.key as keyof Contact] != null ? String(contact[f.key as keyof Contact]) : '']),
+        formFields.map((f) => [f.key, contact[f.key as keyof Contact] != null ? String(contact[f.key as keyof Contact]) : '']),
       ),
     )
     setEditing(true)
@@ -150,7 +169,7 @@ export default function ContactDetailPage() {
         <CardContent>
           {editing ? (
             <RecordForm
-              fields={FORM_FIELDS}
+              fields={formFields}
               values={formValues}
               onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
               onSubmit={handleSave}
@@ -160,7 +179,7 @@ export default function ContactDetailPage() {
               error={saveError}
             />
           ) : (
-            <DetailView record={contact as unknown as Record<string, unknown>} fields={DETAIL_FIELDS} />
+            <DetailView record={contact as unknown as Record<string, unknown>} fields={detailFields} />
           )}
         </CardContent>
       </Card>

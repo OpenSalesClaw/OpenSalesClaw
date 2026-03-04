@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { accountsApi } from '@/api/accounts'
 import { casesApi } from '@/api/cases'
-import type { Case, CaseUpdate } from '@/api/types'
+import type { Account, Case, CaseUpdate } from '@/api/types'
 import DeleteConfirmDialog from '@/components/DeleteConfirmDialog'
 import DetailView, { type FieldDefinition } from '@/components/DetailView'
 import RecordForm from '@/components/RecordForm'
@@ -11,30 +12,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 const STATUSES = ['New', 'Working', 'Escalated', 'Closed']
 const PRIORITIES = ['Low', 'Medium', 'High', 'Critical']
-
-const DETAIL_FIELDS: FieldDefinition[] = [
-  { key: 'case_number', label: 'Case #' },
-  { key: 'subject', label: 'Subject' },
-  { key: 'status', label: 'Status' },
-  { key: 'priority', label: 'Priority' },
-  { key: 'origin', label: 'Origin' },
-  { key: 'type', label: 'Type' },
-  { key: 'reason', label: 'Reason' },
-  { key: 'account_id', label: 'Account ID' },
-  { key: 'contact_id', label: 'Contact ID' },
-  { key: 'description', label: 'Description' },
-  { key: 'closed_at', label: 'Closed At' },
-  { key: 'created_at', label: 'Created At' },
-]
-
-const FORM_FIELDS = [
-  { key: 'subject', label: 'Subject', required: true },
-  { key: 'description', label: 'Description', type: 'textarea' as const },
-  { key: 'status', label: 'Status', type: 'select' as const, options: STATUSES.map((s) => ({ value: s, label: s })) },
-  { key: 'priority', label: 'Priority', type: 'select' as const, options: PRIORITIES.map((s) => ({ value: s, label: s })) },
-  { key: 'account_id', label: 'Account ID', type: 'number' as const },
-  { key: 'reason', label: 'Reason' },
-]
 
 function priorityVariant(p: string): 'default' | 'secondary' | 'destructive' | 'outline' {
   if (p === 'Critical') return 'destructive'
@@ -55,6 +32,48 @@ export default function CaseDetailPage() {
   const [saveError, setSaveError] = useState<string | null>(null)
   const [showDelete, setShowDelete] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [accounts, setAccounts] = useState<Account[]>([])
+
+  useEffect(() => {
+    void accountsApi.list({ limit: 200 }).then((res) => setAccounts(res.items))
+  }, [])
+
+  const accountMap = useMemo(() => new Map(accounts.map((a) => [a.id, a.name])), [accounts])
+  const accountOptions = useMemo(() => accounts.map((a) => ({ value: String(a.id), label: a.name })), [accounts])
+
+  const detailFields = useMemo<FieldDefinition[]>(
+    () => [
+      { key: 'case_number', label: 'Case #' },
+      { key: 'subject', label: 'Subject' },
+      { key: 'status', label: 'Status' },
+      { key: 'priority', label: 'Priority' },
+      { key: 'origin', label: 'Origin' },
+      { key: 'type', label: 'Type' },
+      { key: 'reason', label: 'Reason' },
+      {
+        key: 'account_id',
+        label: 'Account',
+        format: (v) => (v != null ? (accountMap.get(Number(v)) ?? String(v)) : '—'),
+      },
+      { key: 'contact_id', label: 'Contact ID' },
+      { key: 'description', label: 'Description' },
+      { key: 'closed_at', label: 'Closed At' },
+      { key: 'created_at', label: 'Created At' },
+    ],
+    [accountMap],
+  )
+
+  const formFields = useMemo(
+    () => [
+      { key: 'subject', label: 'Subject', required: true },
+      { key: 'description', label: 'Description', type: 'textarea' as const },
+      { key: 'status', label: 'Status', type: 'select' as const, options: STATUSES.map((s) => ({ value: s, label: s })) },
+      { key: 'priority', label: 'Priority', type: 'select' as const, options: PRIORITIES.map((s) => ({ value: s, label: s })) },
+      { key: 'account_id', label: 'Account', type: 'combobox' as const, options: accountOptions, placeholder: 'Search accounts…' },
+      { key: 'reason', label: 'Reason' },
+    ],
+    [accountOptions],
+  )
 
   const load = useCallback(async () => {
     if (!id) return
@@ -74,7 +93,7 @@ export default function CaseDetailPage() {
   const startEdit = () => {
     if (!caseRecord) return
     setFormValues(Object.fromEntries(
-      FORM_FIELDS.map((f) => [f.key, caseRecord[f.key as keyof Case] != null ? String(caseRecord[f.key as keyof Case]) : ''])
+      formFields.map((f) => [f.key, caseRecord[f.key as keyof Case] != null ? String(caseRecord[f.key as keyof Case]) : ''])
     ))
     setEditing(true)
   }
@@ -134,7 +153,7 @@ export default function CaseDetailPage() {
         <CardContent>
           {editing ? (
             <RecordForm
-              fields={FORM_FIELDS}
+              fields={formFields}
               values={formValues}
               onChange={(k, v) => setFormValues((p) => ({ ...p, [k]: v }))}
               onSubmit={handleSave}
@@ -144,7 +163,7 @@ export default function CaseDetailPage() {
               error={saveError}
             />
           ) : (
-            <DetailView record={caseRecord as unknown as Record<string, unknown>} fields={DETAIL_FIELDS} />
+            <DetailView record={caseRecord as unknown as Record<string, unknown>} fields={detailFields} />
           )}
         </CardContent>
       </Card>

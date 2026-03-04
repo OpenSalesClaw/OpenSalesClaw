@@ -1,6 +1,8 @@
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { accountsApi } from '@/api/accounts'
 import { casesApi } from '@/api/cases'
-import type { Case, CaseCreate } from '@/api/types'
+import type { Account, Case, CaseCreate } from '@/api/types'
 import DataTable, { type Column } from '@/components/DataTable'
 import FilterBar from '@/components/FilterBar'
 import RecordForm from '@/components/RecordForm'
@@ -20,45 +22,7 @@ function priorityVariant(p: string): 'default' | 'secondary' | 'destructive' | '
   return 'outline'
 }
 
-const COLUMNS: Column<Case>[] = [
-  { key: 'case_number', label: 'Case #' },
-  { key: 'subject', label: 'Subject' },
-  {
-    key: 'status',
-    label: 'Status',
-    render: (r) => <Badge variant={r.status === 'Closed' ? 'secondary' : 'outline'}>{r.status}</Badge>,
-  },
-  {
-    key: 'priority',
-    label: 'Priority',
-    render: (r) => <Badge variant={priorityVariant(r.priority)}>{r.priority}</Badge>,
-  },
-  { key: 'account_id', label: 'Account ID' },
-]
 
-const FORM_FIELDS = [
-  { key: 'subject', label: 'Subject', required: true, placeholder: 'Login issue' },
-  { key: 'description', label: 'Description', type: 'textarea' as const },
-  {
-    key: 'status',
-    label: 'Status',
-    type: 'select' as const,
-    options: STATUSES.map((s) => ({ value: s, label: s })),
-  },
-  {
-    key: 'priority',
-    label: 'Priority',
-    type: 'select' as const,
-    options: PRIORITIES.map((s) => ({ value: s, label: s })),
-  },
-  { key: 'account_id', label: 'Account ID', type: 'number' as const, placeholder: '1' },
-  {
-    key: 'origin',
-    label: 'Origin',
-    type: 'select' as const,
-    options: ['Phone', 'Email', 'Web'].map((s) => ({ value: s, label: s })),
-  },
-]
 
 function buildListParams(f: Record<string, string>) {
   return {
@@ -80,6 +44,50 @@ function buildCreatePayload(f: Record<string, string>): CaseCreate {
 
 export default function CasesPage() {
   const navigate = useNavigate()
+  const [accounts, setAccounts] = useState<Account[]>([])
+
+  useEffect(() => {
+    void accountsApi.list({ limit: 200 }).then((res) => setAccounts(res.items))
+  }, [])
+
+  const accountMap = useMemo(() => new Map(accounts.map((a) => [a.id, a.name])), [accounts])
+  const accountOptions = useMemo(() => accounts.map((a) => ({ value: String(a.id), label: a.name })), [accounts])
+
+  const columns = useMemo<Column<Case>[]>(
+    () => [
+      { key: 'case_number', label: 'Case #' },
+      { key: 'subject', label: 'Subject' },
+      {
+        key: 'status',
+        label: 'Status',
+        render: (r) => <Badge variant={r.status === 'Closed' ? 'secondary' : 'outline'}>{r.status}</Badge>,
+      },
+      {
+        key: 'priority',
+        label: 'Priority',
+        render: (r) => <Badge variant={priorityVariant(r.priority)}>{r.priority}</Badge>,
+      },
+      {
+        key: 'account_id',
+        label: 'Account',
+        render: (r) => (r.account_id != null ? (accountMap.get(r.account_id) ?? String(r.account_id)) : '—'),
+      },
+    ],
+    [accountMap],
+  )
+
+  const formFields = useMemo(
+    () => [
+      { key: 'subject', label: 'Subject', required: true, placeholder: 'Login issue' },
+      { key: 'description', label: 'Description', type: 'textarea' as const },
+      { key: 'status', label: 'Status', type: 'select' as const, options: STATUSES.map((s) => ({ value: s, label: s })) },
+      { key: 'priority', label: 'Priority', type: 'select' as const, options: PRIORITIES.map((s) => ({ value: s, label: s })) },
+      { key: 'account_id', label: 'Account', type: 'combobox' as const, options: accountOptions, placeholder: 'Search accounts…' },
+      { key: 'origin', label: 'Origin', type: 'select' as const, options: ['Phone', 'Email', 'Web'].map((s) => ({ value: s, label: s })) },
+    ],
+    [accountOptions],
+  )
+
   const crud = useEntityCRUD<Case, CaseCreate>({
     api: casesApi,
     pageSize: PAGE_SIZE,
@@ -116,7 +124,7 @@ export default function CasesPage() {
       />
 
       <DataTable
-        columns={COLUMNS}
+        columns={columns}
         data={crud.items}
         loading={crud.loading}
         total={crud.total}
@@ -132,7 +140,7 @@ export default function CasesPage() {
             <DialogTitle>New Case</DialogTitle>
           </DialogHeader>
           <RecordForm
-            fields={FORM_FIELDS}
+            fields={formFields}
             values={crud.formValues}
             onChange={crud.setFormValue}
             onSubmit={() => void crud.handleCreate()}
