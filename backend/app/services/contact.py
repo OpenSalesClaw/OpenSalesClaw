@@ -3,7 +3,6 @@ from typing import Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.pagination import PaginationParams
-
 from app.models.contact import Contact
 from app.schemas.contact import ContactCreate, ContactUpdate
 from app.services.base import CRUDService
