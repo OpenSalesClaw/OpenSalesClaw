@@ -1,5 +1,9 @@
 from typing import Any
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.pagination import PaginationParams
+
 from app.models.contact import Contact
 from app.schemas.contact import ContactCreate, ContactUpdate
 from app.services.base import CRUDService
@@ -17,7 +21,14 @@ class ContactService(CRUDService[Contact, ContactCreate, ContactUpdate]):
             query = query.where(Contact.email.ilike(f"%{email}%"))
         return query
 
-    async def list(self, db, pagination, *, order_by=None, **filters):
+    async def list(
+        self,
+        db: AsyncSession,
+        pagination: PaginationParams,
+        *,
+        order_by: Any | None = None,
+        **filters: Any,
+    ) -> tuple[list[Contact], int]:
         """Contacts default to alphabetical by last name."""
         if order_by is None:
             order_by = Contact.last_name.asc()

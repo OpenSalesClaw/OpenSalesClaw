@@ -3,13 +3,13 @@ from typing import TYPE_CHECKING
 from sqlalchemy import BigInteger, ForeignKey, Identity, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import Base, StandardColumns
+from app.models.base import BaseEntity
 
 if TYPE_CHECKING:
     from app.models.account import Account
 
 
-class Contact(StandardColumns, Base):
+class Contact(BaseEntity):
     __tablename__ = "contacts"
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(always=True), primary_key=True)

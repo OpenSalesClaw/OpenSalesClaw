@@ -9,9 +9,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import NotFoundError
 from app.core.pagination import PaginationParams
-from app.models.base import Base
+from app.models.base import BaseEntity
 
-ModelType = TypeVar("ModelType", bound=Base)
+ModelType = TypeVar("ModelType", bound=BaseEntity)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
 UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 
@@ -29,7 +29,7 @@ class CRUDService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         result = await db.execute(
             select(self.model).where(
                 self.model.id == record_id,
-                self.model.is_deleted.is_(False),  # type: ignore[union-attr]
+                self.model.is_deleted.is_(False),
             )
         )
         record = result.scalars().first()
@@ -45,7 +45,7 @@ class CRUDService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         order_by: Any | None = None,
         **filters: Any,
     ) -> tuple[list[ModelType], int]:
-        query = select(self.model).where(self.model.is_deleted.is_(False))  # type: ignore[union-attr]
+        query = select(self.model).where(self.model.is_deleted.is_(False))
         query = self.apply_list_filters(query, **filters)
 
         count_result = await db.execute(select(func.count()).select_from(query.subquery()))
@@ -54,7 +54,7 @@ class CRUDService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         if order_by is not None:
             query = query.order_by(order_by)
         else:
-            query = query.order_by(self.model.created_at.desc())  # type: ignore[union-attr]
+            query = query.order_by(self.model.created_at.desc())
 
         query = query.offset(pagination.offset).limit(pagination.limit)
         result = await db.execute(query)
@@ -82,14 +82,14 @@ class CRUDService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         record = await self.get_by_id(db, record_id)
         for field, value in data.model_dump(exclude_unset=True).items():
             setattr(record, field, value)
-        record.updated_by_id = updated_by_id  # type: ignore[union-attr]
+        record.updated_by_id = updated_by_id
         await db.flush()
         await db.refresh(record)
         return record
 
     async def delete(self, db: AsyncSession, record_id: int, deleted_by_id: int | None = None) -> None:
         record = await self.get_by_id(db, record_id)
-        record.is_deleted = True  # type: ignore[union-attr]
-        record.deleted_at = datetime.now(UTC)  # type: ignore[union-attr]
-        record.deleted_by_id = deleted_by_id  # type: ignore[union-attr]
+        record.is_deleted = True
+        record.deleted_at = datetime.now(UTC)
+        record.deleted_by_id = deleted_by_id
         await db.flush()

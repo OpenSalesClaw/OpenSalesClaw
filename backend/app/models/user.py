@@ -1,10 +1,10 @@
 from sqlalchemy import BigInteger, Boolean, Identity, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.models.base import Base, StandardColumns
+from app.models.base import BaseEntity
 
 
-class User(StandardColumns, Base):
+class User(BaseEntity):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(always=True), primary_key=True)

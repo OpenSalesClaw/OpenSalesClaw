@@ -4,10 +4,10 @@ from sqlalchemy import BigInteger, Boolean, Identity, Integer, String, Text, Uni
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.models.base import Base, StandardColumns
+from app.models.base import BaseEntity
 
 
-class CustomFieldDefinition(StandardColumns, Base):
+class CustomFieldDefinition(BaseEntity):
     __tablename__ = "custom_field_definitions"
     __table_args__ = (UniqueConstraint("object_name", "field_name", name="uq_custom_field_definitions_object_field"),)
 

@@ -40,3 +40,18 @@ class StandardColumns:
     is_deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
     deleted_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
     deleted_by_id: Mapped[int | None] = mapped_column(BigInteger, ForeignKey("users.id", use_alter=True), nullable=True)
+
+
+class BaseEntity(StandardColumns, Base):
+    """Abstract declarative base that combines ``Base`` with ``StandardColumns``.
+
+    All entity models should inherit from this class rather than from
+    ``StandardColumns`` and ``Base`` separately.  The abstract ``id`` annotation
+    tells mypy (and type-checkers in general) that every concrete subclass will
+    expose an integer primary key, which is required by the generic
+    :class:`~app.services.base.CRUDService`.
+    """
+
+    __abstract__ = True
+
+    id: Mapped[int]
