@@ -48,10 +48,10 @@
 | F-CORE-001 | Accounts CRUD | Create, read, update, soft-delete company/organization records | MVP | Done |
 | F-CORE-002 | Contacts CRUD | Manage individual people linked to accounts | MVP | Done |
 | F-CORE-003 | Leads CRUD | Track unqualified prospects before conversion | MVP | Done |
-| F-CORE-004 | Opportunities CRUD | Manage potential deals/sales with stage tracking | MVP | Not Started |
-| F-CORE-005 | Cases CRUD | Customer support tickets/issues | MVP | Not Started |
-| F-CORE-006 | Users CRUD | System user management (name, email, role, profile) | MVP | In Progress |
-| F-CORE-007 | Roles & Role Hierarchy | Define organizational roles with parent-child hierarchy | MVP | Not Started |
+| F-CORE-004 | Opportunities CRUD | Manage potential deals/sales with stage tracking | MVP | Done |
+| F-CORE-005 | Cases CRUD | Customer support tickets/issues | MVP | Done |
+| F-CORE-006 | Users CRUD | System user management (name, email, role, profile) | MVP | Done |
+| F-CORE-007 | Roles & Role Hierarchy | Define organizational roles with parent-child hierarchy | MVP | Done |
 | F-CORE-008 | Record Types | Sub-classify records within an object (e.g., "Partner Account") | P1 | Not Started |
 | F-CORE-009 | Account Hierarchy | Parent-child relationships between accounts | P1 | Not Started |
 | F-CORE-010 | Account-Contact Relationships | Many-to-many relationships between accounts and contacts | P1 | Not Started |
@@ -69,7 +69,7 @@
 
 | ID | Feature | Description | Priority | Status |
 |----|---------|-------------|----------|--------|
-| F-SALES-001 | Opportunity Stages & Pipeline | Configurable sales stages with probability % | MVP | Not Started |
+| F-SALES-001 | Opportunity Stages & Pipeline | Configurable sales stages with probability % | MVP | Done |
 | F-SALES-002 | Lead Conversion | Convert a lead into account + contact + opportunity | P1 | Not Started |
 | F-SALES-003 | Products | Product catalogue with descriptions, codes, and families | P1 | Not Started |
 | F-SALES-004 | Price Books | Multiple price books (standard + custom) per currency/segment | P1 | Not Started |
@@ -118,7 +118,7 @@
 
 | ID | Feature | Description | Priority | Status |
 |----|---------|-------------|----------|--------|
-| F-SVC-001 | Case Management | Full case lifecycle: new → working → escalated → closed | MVP | Not Started |
+| F-SVC-001 | Case Management | Full case lifecycle: new → working → escalated → closed | MVP | Done |
 | F-SVC-002 | Case Assignment Rules | Auto-assign cases by criteria (product, region, priority) | P1 | Not Started |
 | F-SVC-003 | Case Escalation Rules | Time-based escalation when cases aren't resolved | P2 | Not Started |
 | F-SVC-004 | Case Queues | Shared queues for team-based case ownership | P2 | Not Started |
@@ -206,11 +206,11 @@
 
 | ID | Feature | Description | Priority | Status |
 |----|---------|-------------|----------|--------|
-| F-CUST-001 | Custom Fields | Add user-defined fields to any standard or custom object (JSONB) | MVP | Not Started |
-| F-CUST-002 | Custom Field Types | Support text, number, date, datetime, boolean, picklist, lookup, email, URL, phone, currency, percent, textarea, rich text, formula, auto-number | MVP | Not Started |
+| F-CUST-001 | Custom Fields | Add user-defined fields to any standard or custom object (JSONB) | MVP | Done |
+| F-CUST-002 | Custom Field Types | Support text, number, date, datetime, boolean, picklist, lookup, email, URL, phone, currency, percent, textarea, rich text, formula, auto-number | MVP | In Progress |
 | F-CUST-003 | Custom Objects | Create entirely new objects at runtime with full CRUD | P1 | Not Started |
-| F-CUST-004 | Custom Field Definitions Table | Metadata-driven registry of all custom fields | MVP | Not Started |
-| F-CUST-005 | Picklist Management | Create, edit, and reorder picklist values per field | MVP | Not Started |
+| F-CUST-004 | Custom Field Definitions Table | Metadata-driven registry of all custom fields | MVP | Done |
+| F-CUST-005 | Picklist Management | Create, edit, and reorder picklist values per field | MVP | Done |
 | F-CUST-006 | Dependent Picklists | Cascade picklist values based on a controlling field | P2 | Not Started |
 | F-CUST-007 | Multi-Select Picklists | Allow multiple picklist value selections | P2 | Not Started |
 | F-CUST-008 | Global Picklist Value Sets | Shared picklist definitions reusable across fields | P3 | Not Started |
@@ -231,14 +231,14 @@
 
 | ID | Feature | Description | Priority | Status |
 |----|---------|-------------|----------|--------|
-| F-SEC-001 | User Authentication (OAuth 2.0) | Login via OAuth 2.0 / OpenID Connect | MVP | Not Started |
+| F-SEC-001 | User Authentication (OAuth 2.0) | Login via OAuth 2.0 / OpenID Connect | MVP | In Progress |
 | F-SEC-002 | Username/Password Login | Local credential authentication with bcrypt hashing | MVP | Done |
 | F-SEC-003 | Multi-Factor Authentication (MFA) | TOTP-based second factor | P1 | Not Started |
 | F-SEC-004 | SSO (SAML / OIDC) | Single sign-on with external IdPs (Okta, Azure AD, Google) | P2 | Not Started |
 | F-SEC-005 | Profiles | Define base-level object & field permissions per profile | P1 | Not Started |
 | F-SEC-006 | Permission Sets | Additive permissions layered on top of profiles | P2 | Not Started |
 | F-SEC-007 | Permission Set Groups | Group multiple permission sets for assignment | P3 | Not Started |
-| F-SEC-008 | Role Hierarchy | Control record visibility through organizational hierarchy | P1 | Not Started |
+| F-SEC-008 | Role Hierarchy | Control record visibility through organizational hierarchy | P1 | Done |
 | F-SEC-009 | Organization-Wide Defaults (OWD) | Default sharing level per object (Private, Public Read, Public R/W) | P1 | Not Started |
 | F-SEC-010 | Sharing Rules | Criteria-based and owner-based sharing rules | P2 | Not Started |
 | F-SEC-011 | Manual Record Sharing | Users can share individual records with other users/groups | P2 | Not Started |
@@ -317,8 +317,8 @@
 
 | ID | Feature | Description | Priority | Status |
 |----|---------|-------------|----------|--------|
-| F-INT-001 | RESTful CRUD API | Full CRUD endpoints for every object with filtering, sorting, pagination | MVP | In Progress |
-| F-INT-002 | OpenAPI / Swagger Docs | Auto-generated interactive API documentation | MVP | Not Started |
+| F-INT-001 | RESTful CRUD API | Full CRUD endpoints for every object with filtering, sorting, pagination | MVP | Done |
+| F-INT-002 | OpenAPI / Swagger Docs | Auto-generated interactive API documentation | MVP | Done |
 | F-INT-003 | API Versioning | Version the API (URL or header-based) for backward compatibility | P1 | Not Started |
 | F-INT-004 | Webhooks (Outbound) | Configurable HTTP callbacks on record events (create, update, delete) | P1 | Not Started |
 | F-INT-005 | Webhook Management UI | Admin interface to create, test, and monitor webhooks | P2 | Not Started |
@@ -387,8 +387,8 @@
 | ID | Feature | Description | Priority | Status |
 |----|---------|-------------|----------|--------|
 | T-ARCH-001 | FastAPI Application Scaffold | Project structure with routers, models, schemas, services | MVP | Not Started |
-| T-ARCH-002 | React + Vite Scaffold | Frontend project with TypeScript, routing, API client, and Tailwind CSS + shadcn/ui | MVP | Not Started |
-| T-ARCH-002a | shadcn/ui Setup | Install Tailwind CSS, initialize shadcn/ui, configure CSS variables and theme in `index.css` | MVP | Not Started |
+| T-ARCH-002 | React + Vite Scaffold | Frontend project with TypeScript, routing, API client, and Tailwind CSS + shadcn/ui | MVP | Done |
+| T-ARCH-002a | shadcn/ui Setup | Install Tailwind CSS, initialize shadcn/ui, configure CSS variables and theme in `index.css` | MVP | Done |
 | T-ARCH-003 | Docker Compose (Dev) | One-command local dev environment (API + DB + frontend) | MVP | Done |
 | T-ARCH-004 | Docker Compose (Production) | Production-ready compose with Traefik reverse proxy | P1 | Done |
 | T-ARCH-005 | Environment Configuration | 12-factor config via environment variables with validation | MVP | Not Started |
@@ -409,16 +409,16 @@
 
 | ID | Feature | Description | Priority | Status |
 |----|---------|-------------|----------|--------|
-| T-DB-001 | PostgreSQL Schema Design | Full schema for all core objects with conventions from copilot-instructions | MVP | Not Started |
+| T-DB-001 | PostgreSQL Schema Design | Full schema for all core objects with conventions from copilot-instructions | MVP | Done |
 | T-DB-002 | Alembic Migration Setup | Migration framework with auto-generation and version tracking | MVP | Done |
-| T-DB-003 | BaseModel Mixin | Shared SQLAlchemy mixin for id, sfid, audit cols, soft-delete, custom_fields | MVP | Not Started |
-| T-DB-004 | JSONB Custom Fields with GIN Index | Custom field storage with performant querying | MVP | Not Started |
+| T-DB-003 | BaseModel Mixin | Shared SQLAlchemy mixin for id, sfid, audit cols, soft-delete, custom_fields | MVP | Done |
+| T-DB-004 | JSONB Custom Fields with GIN Index | Custom field storage with performant querying | MVP | Done |
 | T-DB-005 | Full-Text Search (tsvector) | PostgreSQL full-text search across key fields | P1 | Not Started |
 | T-DB-006 | Database Connection Pooling | SQLAlchemy async pool + PgBouncer for production | P1 | Not Started |
 | T-DB-007 | Read Replicas | Support routing read queries to replica databases | P3 | Not Started |
-| T-DB-008 | Database Seeding Scripts | Populate reference data (picklists, record types, admin user) | P1 | Not Started |
+| T-DB-008 | Database Seeding Scripts | Populate reference data (picklists, record types, admin user) | P1 | Done |
 | T-DB-009 | `updated_at` Trigger | PostgreSQL trigger to auto-set `updated_at` on every UPDATE | MVP | Not Started |
-| T-DB-010 | Soft-Delete Query Filter | Default query filter excluding `is_deleted = TRUE` records | MVP | Not Started |
+| T-DB-010 | Soft-Delete Query Filter | Default query filter excluding `is_deleted = TRUE` records | MVP | Done |
 | T-DB-011 | Indexing Strategy | Indexes on foreign keys, frequently filtered/sorted columns | P1 | Not Started |
 | T-DB-012 | Database Backup & Restore | Automated pg_dump backups with point-in-time restore | P1 | Not Started |
 | T-DB-013 | Object-Level Storage (S3/MinIO) | Blob storage for file attachments | P1 | Not Started |
@@ -468,7 +468,7 @@
 
 | ID | Feature | Description | Priority | Status |
 |----|---------|-------------|----------|--------|
-| T-DX-001 | OpenAPI Auto-Generated Docs | Swagger UI and ReDoc served at `/docs` and `/redoc` | MVP | Not Started |
+| T-DX-001 | OpenAPI Auto-Generated Docs | Swagger UI and ReDoc served at `/docs` and `/redoc` | MVP | Done |
 | T-DX-002 | Hot Reload (Backend) | Uvicorn `--reload` for fast dev iteration | MVP | Not Started |
 | T-DX-003 | Hot Reload (Frontend) | Vite HMR for instant frontend updates | MVP | Not Started |
 | T-DX-004 | Makefile / Task Runner | `make dev`, `make test`, `make migrate`, etc. | P1 | Not Started |
@@ -487,7 +487,7 @@
 
 | ID | Feature | Description | Priority | Status |
 |----|---------|-------------|----------|--------|
-| T-PERF-001 | Async Database Sessions | Non-blocking DB access via SQLAlchemy async engine | MVP | Not Started |
+| T-PERF-001 | Async Database Sessions | Non-blocking DB access via SQLAlchemy async engine | MVP | Done |
 | T-PERF-002 | Pagination (Offset/Limit) | All list endpoints paginated with configurable limits | MVP | Done |
 | T-PERF-003 | Cursor-Based Pagination | Keyset pagination for large datasets and infinite scroll | P2 | Not Started |
 | T-PERF-004 | Selective Field Retrieval | `?fields=id,name,email` parameter to reduce payload size | P2 | Not Started |

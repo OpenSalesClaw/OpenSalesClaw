@@ -25,3 +25,29 @@ async def create_lead(client: AsyncClient, headers: dict[str, str], **kwargs) ->
     resp = await client.post("/api/leads", json=payload, headers=headers)
     assert resp.status_code == 201, resp.text
     return resp.json()
+
+
+async def create_opportunity(client: AsyncClient, headers: dict[str, str], **kwargs) -> dict:
+    """Create an opportunity via the API and return the response JSON."""
+    from datetime import date
+
+    payload = {"name": "Test Opportunity", "close_date": date.today().isoformat(), **kwargs}
+    resp = await client.post("/api/opportunities", json=payload, headers=headers)
+    assert resp.status_code == 201, resp.text
+    return resp.json()
+
+
+async def create_case(client: AsyncClient, headers: dict[str, str], **kwargs) -> dict:
+    """Create a case via the API and return the response JSON."""
+    payload = {"subject": "Test Case", **kwargs}
+    resp = await client.post("/api/cases", json=payload, headers=headers)
+    assert resp.status_code == 201, resp.text
+    return resp.json()
+
+
+async def create_role(client: AsyncClient, headers: dict[str, str], **kwargs) -> dict:
+    """Create a role via the API (requires superuser headers) and return the response JSON."""
+    payload = {"name": "Test Role", **kwargs}
+    resp = await client.post("/api/roles", json=payload, headers=headers)
+    assert resp.status_code == 201, resp.text
+    return resp.json()

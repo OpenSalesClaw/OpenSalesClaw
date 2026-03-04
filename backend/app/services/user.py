@@ -1,7 +1,8 @@
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import AuthenticationError, ConflictError, NotFoundError
+from app.core.pagination import PaginationParams
 from app.core.security import hash_password, verify_password
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
@@ -55,6 +56,39 @@ async def update_user(db: AsyncSession, user_id: int, data: UserUpdate, updated_
         update_data["hashed_password"] = hash_password(update_data.pop("password"))
     for field, value in update_data.items():
         setattr(user, field, value)
+    user.updated_by_id = updated_by_id
+    await db.flush()
+    await db.refresh(user)
+    return user
+
+
+async def list_users(
+    db: AsyncSession,
+    pagination: PaginationParams,
+    *,
+    is_active: bool | None = None,
+    role_id: int | None = None,
+    email_search: str | None = None,
+) -> tuple[list[User], int]:
+    query = select(User).where(User.is_deleted.is_(False))
+    if is_active is not None:
+        query = query.where(User.is_active.is_(is_active))
+    if role_id is not None:
+        query = query.where(User.role_id == role_id)
+    if email_search:
+        query = query.where(User.email.ilike(f"%{email_search}%"))
+
+    count_result = await db.execute(select(func.count()).select_from(query.subquery()))
+    total = count_result.scalar_one()
+
+    query = query.order_by(User.email.asc()).offset(pagination.offset).limit(pagination.limit)
+    result = await db.execute(query)
+    return list(result.scalars().all()), total
+
+
+async def deactivate_user(db: AsyncSession, user_id: int, updated_by_id: int | None = None) -> User:
+    user = await get_user_by_id(db, user_id)
+    user.is_active = False
     user.updated_by_id = updated_by_id
     await db.flush()
     await db.refresh(user)

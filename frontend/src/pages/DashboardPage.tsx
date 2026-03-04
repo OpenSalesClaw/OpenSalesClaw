@@ -1,60 +1,79 @@
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { accountsApi } from '@/api/accounts'
+import { casesApi } from '@/api/cases'
+import { contactsApi } from '@/api/contacts'
+import { leadsApi } from '@/api/leads'
+import { opportunitiesApi } from '@/api/opportunities'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAuthStore } from '../stores/authStore'
 
+interface Stat {
+  label: string
+  value: string
+  to: string
+}
+
 export default function DashboardPage() {
+  const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
+  const [stats, setStats] = useState<Stat[]>([
+    { label: 'Accounts', value: '—', to: '/accounts' },
+    { label: 'Contacts', value: '—', to: '/contacts' },
+    { label: 'Leads', value: '—', to: '/leads' },
+    { label: 'Opportunities', value: '—', to: '/opportunities' },
+    { label: 'Cases', value: '—', to: '/cases' },
+  ])
 
   const fullName = [user?.first_name, user?.last_name].filter(Boolean).join(' ') || user?.email || 'User'
 
-  return (
-    <div>
-      <h2 style={{ marginTop: 0, color: '#111827' }}>Dashboard</h2>
-      <p style={{ color: '#6b7280' }}>Welcome back, {fullName}.</p>
+  useEffect(() => {
+    void (async () => {
+      try {
+        const [accounts, contacts, leads, opportunities, cases] = await Promise.allSettled([
+          accountsApi.list({ offset: 0, limit: 1 }),
+          contactsApi.list({ offset: 0, limit: 1 }),
+          leadsApi.list({ offset: 0, limit: 1 }),
+          opportunitiesApi.list({ offset: 0, limit: 1 }),
+          casesApi.list({ offset: 0, limit: 1 }),
+        ])
+        setStats([
+          { label: 'Accounts', value: accounts.status === 'fulfilled' ? String(accounts.value.total) : '—', to: '/accounts' },
+          { label: 'Contacts', value: contacts.status === 'fulfilled' ? String(contacts.value.total) : '—', to: '/contacts' },
+          { label: 'Leads', value: leads.status === 'fulfilled' ? String(leads.value.total) : '—', to: '/leads' },
+          { label: 'Opportunities', value: opportunities.status === 'fulfilled' ? String(opportunities.value.total) : '—', to: '/opportunities' },
+          { label: 'Cases', value: cases.status === 'fulfilled' ? String(cases.value.total) : '—', to: '/cases' },
+        ])
+      } catch {
+        // leave defaults
+      }
+    })()
+  }, [])
 
-      <div style={styles.cardGrid}>
-        <StatCard label="Accounts" value="—" />
-        <StatCard label="Contacts" value="—" />
-        <StatCard label="Leads" value="—" />
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-semibold tracking-tight">Dashboard</h2>
+        <p className="text-muted-foreground mt-1">Welcome back, {fullName}.</p>
       </div>
 
-      <p style={{ marginTop: '2rem', color: '#9ca3af', fontSize: '0.875rem' }}>
-        More widgets coming in a future phase.
-      </p>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+        {stats.map((s) => (
+          <Card
+            key={s.label}
+            className="cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => navigate(s.to)}
+          >
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{s.label}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">{s.value}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   )
 }
 
-function StatCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div style={styles.card}>
-      <p style={styles.cardValue}>{value}</p>
-      <p style={styles.cardLabel}>{label}</p>
-    </div>
-  )
-}
-
-const styles: Record<string, React.CSSProperties> = {
-  cardGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-    gap: '1rem',
-    marginTop: '1.5rem',
-  },
-  card: {
-    backgroundColor: '#fff',
-    border: '1px solid #e5e7eb',
-    borderRadius: 8,
-    padding: '1.25rem 1rem',
-    textAlign: 'center',
-  },
-  cardValue: {
-    fontSize: '2rem',
-    fontWeight: 700,
-    color: '#111827',
-    margin: '0 0 0.25rem',
-  },
-  cardLabel: {
-    fontSize: '0.875rem',
-    color: '#6b7280',
-    margin: 0,
-  },
-}

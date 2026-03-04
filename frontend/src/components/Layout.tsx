@@ -6,6 +6,8 @@ const NAV_ITEMS: { label: string; to: string }[] = [
   { label: 'Accounts', to: '/accounts' },
   { label: 'Contacts', to: '/contacts' },
   { label: 'Leads', to: '/leads' },
+  { label: 'Opportunities', to: '/opportunities' },
+  { label: 'Cases', to: '/cases' },
 ]
 
 interface LayoutProps {

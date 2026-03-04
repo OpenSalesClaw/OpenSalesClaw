@@ -6,7 +6,7 @@ from typing import Any
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import accounts, auth, contacts, leads
+from app.api import accounts, auth, cases, contacts, custom_field_definitions, leads, opportunities, roles, users
 from app.core.config import settings
 from app.core.database import AsyncSessionLocal
 from app.core.exceptions import register_exception_handlers
@@ -29,12 +29,45 @@ async def lifespan(application: FastAPI) -> AsyncGenerator[None, None]:  # noqa:
     yield
 
 
+_DESCRIPTION = """
+**OpenSalesClaw** is an open-source, self-hostable CRM platform modelled after Salesforce.
+
+## Features
+
+* Standard CRM objects: **Accounts, Contacts, Leads, Opportunities, Cases**
+* Full **CRUD** with soft-delete, pagination, filtering, and sorting
+* **Custom fields** backed by PostgreSQL JSONB with runtime type validation
+* **Role-based access control** (RBAC) with user and role management
+* OAuth 2.0 / JWT authentication
+
+## Authentication
+
+All endpoints (except `/api/auth/login`) require a Bearer token obtained from `/api/auth/login`.
+"""
+
+_TAGS_METADATA: list[dict] = [
+    {"name": "auth", "description": "Authentication – obtain and refresh JWT tokens."},
+    {"name": "accounts", "description": "Company or organisation records."},
+    {"name": "contacts", "description": "Individual people associated with accounts."},
+    {"name": "leads", "description": "Unqualified prospects not yet linked to an account."},
+    {"name": "opportunities", "description": "Potential deals / sales in progress."},
+    {"name": "cases", "description": "Customer support tickets and issues."},
+    {"name": "users", "description": "User administration (superuser only)."},
+    {"name": "roles", "description": "Role management with hierarchical permissions."},
+    {"name": "custom-field-definitions", "description": "Define custom fields on any object."},
+    {"name": "health", "description": "Health-check endpoint."},
+]
+
 app = FastAPI(
     title=settings.app_name,
-    description="Open-source self-hostable CRM platform",
+    description=_DESCRIPTION,
     version="0.1.0",
+    openapi_tags=_TAGS_METADATA,
+    contact={"name": "OpenSalesClaw", "url": "https://github.com/opensalesclaw/opensalesclaw"},
+    license_info={"name": "MIT", "url": "https://opensource.org/licenses/MIT"},
     lifespan=lifespan,
 )
+
 
 # ---------------------------------------------------------------------------
 # CORS
@@ -62,6 +95,11 @@ app.include_router(auth.router)
 app.include_router(accounts.router)
 app.include_router(contacts.router)
 app.include_router(leads.router)
+app.include_router(opportunities.router)
+app.include_router(cases.router)
+app.include_router(users.router)
+app.include_router(roles.router)
+app.include_router(custom_field_definitions.router)
 
 
 # ---------------------------------------------------------------------------

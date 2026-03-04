@@ -65,8 +65,10 @@ class CRUDService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return query
 
     async def create(self, db: AsyncSession, data: CreateSchemaType, created_by_id: int | None = None) -> ModelType:
+        payload = data.model_dump()
+        await self._validate_custom_fields(db, payload)
         record = self.model(
-            **data.model_dump(),
+            **payload,
             created_by_id=created_by_id,
             updated_by_id=created_by_id,
             owner_id=created_by_id,
@@ -80,12 +82,27 @@ class CRUDService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         self, db: AsyncSession, record_id: int, data: UpdateSchemaType, updated_by_id: int | None = None
     ) -> ModelType:
         record = await self.get_by_id(db, record_id)
-        for field, value in data.model_dump(exclude_unset=True).items():
+        updates = data.model_dump(exclude_unset=True)
+        if "custom_fields" in updates and updates["custom_fields"] is not None:
+            await self._validate_custom_fields(db, {"custom_fields": updates["custom_fields"]})
+        for field, value in updates.items():
             setattr(record, field, value)
         record.updated_by_id = updated_by_id
         await db.flush()
         await db.refresh(record)
         return record
+
+    async def _validate_custom_fields(self, db: AsyncSession, payload: dict[str, Any]) -> None:
+        """Validate custom_fields if present. Uses lazy import to avoid circular deps."""
+        custom_fields = payload.get("custom_fields")
+        if custom_fields is None or not isinstance(custom_fields, dict):
+            return
+        # Lazy import to avoid circular dependency
+        from app.services.custom_field_definition import custom_field_definition_service
+
+        object_name = getattr(self.model, "__tablename__", None)
+        if object_name:
+            await custom_field_definition_service.validate_custom_fields(db, object_name, custom_fields)
 
     async def delete(self, db: AsyncSession, record_id: int, deleted_by_id: int | None = None) -> None:
         record = await self.get_by_id(db, record_id)

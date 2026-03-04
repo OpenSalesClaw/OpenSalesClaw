@@ -1,9 +1,8 @@
-from datetime import datetime
 from typing import Any
 
 from pydantic import BaseModel
 
-from app.schemas.base import StandardReadFields
+from app.schemas.base import StandardReadFields, TZAwareDatetime
 
 
 class LeadCreate(BaseModel):
@@ -43,6 +42,6 @@ class LeadRead(StandardReadFields):
     status: str
     lead_source: str | None
     industry: str | None
-    converted_at: datetime | None
+    converted_at: TZAwareDatetime | None
     converted_account_id: int | None
     converted_contact_id: int | None

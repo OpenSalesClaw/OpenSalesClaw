@@ -124,6 +124,8 @@ async def client(db: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
 
 _TEST_USER_EMAIL = "testuser@example.com"
 _TEST_USER_PASSWORD = "testpassword123"
+_TEST_SUPERUSER_EMAIL = "superuser@example.com"
+_TEST_SUPERUSER_PASSWORD = "superpassword123"
 
 
 @pytest.fixture
@@ -143,5 +145,40 @@ async def auth_headers(client: AsyncClient) -> dict[str, str]:
         data={"username": _TEST_USER_EMAIL, "password": _TEST_USER_PASSWORD},
     )
     assert resp.status_code == 200, f"Login failed: {resp.text}"
+    token = resp.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+async def superuser_headers(client: AsyncClient, db: AsyncSession) -> dict[str, str]:
+    """Register a test superuser, promote to superuser, and return auth headers."""
+    from sqlalchemy import select
+
+    from app.core.security import hash_password
+    from app.models.user import User as UserModel
+
+    await client.post(
+        "/api/auth/register",
+        json={
+            "email": _TEST_SUPERUSER_EMAIL,
+            "password": _TEST_SUPERUSER_PASSWORD,
+            "first_name": "Super",
+            "last_name": "Admin",
+        },
+    )
+    # Directly promote to superuser in the test session
+    result = await db.execute(
+        select(UserModel).where(UserModel.email == _TEST_SUPERUSER_EMAIL)
+    )
+    user = result.scalars().first()
+    assert user is not None
+    user.is_superuser = True
+    await db.flush()
+
+    resp = await client.post(
+        "/api/auth/login",
+        data={"username": _TEST_SUPERUSER_EMAIL, "password": _TEST_SUPERUSER_PASSWORD},
+    )
+    assert resp.status_code == 200, f"Superuser login failed: {resp.text}"
     token = resp.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}

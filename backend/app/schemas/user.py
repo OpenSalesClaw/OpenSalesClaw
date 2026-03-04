@@ -16,6 +16,8 @@ class UserUpdate(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
     is_active: bool | None = None
+    is_superuser: bool | None = None
+    role_id: int | None = None
 
 
 class UserRead(StandardReadFields):
@@ -25,3 +27,16 @@ class UserRead(StandardReadFields):
     last_name: str | None
     is_active: bool
     is_superuser: bool
+    role_id: int | None = None
+
+
+class UserList(StandardReadFields):
+    """Lightweight user schema for list responses (no sensitive fields)."""
+
+    id: int
+    email: str
+    first_name: str | None
+    last_name: str | None
+    is_active: bool
+    is_superuser: bool
+    role_id: int | None = None

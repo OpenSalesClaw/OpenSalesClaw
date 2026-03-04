@@ -176,7 +176,7 @@ The admin user is only created if no user with that email already exists — cre
 
 ### Demo CRM data
 
-To populate the database with realistic demo records (~20 accounts, ~50 contacts, ~30 leads) set `SEED_DEMO_DATA=true`. Demo data is also idempotent and will be skipped if it detects existing records.
+To populate the database with realistic demo records (~20 accounts, ~50 contacts, ~30 leads, ~15 opportunities, ~10 cases, ~5 roles) set `SEED_DEMO_DATA=true`. Demo data is also idempotent and will be skipped if it detects existing records.
 
 ```bash
 # Docker Compose — set the variable and restart
@@ -242,7 +242,7 @@ Query value   →  PostgreSQL JSONB operators + GIN index
 │   └── schema.sql        # Full PostgreSQL schema (tables, indexes, triggers)
 ├── backend/              # FastAPI application (Python 3.11+)
 │   ├── app/
-│   │   ├── api/          # Route handlers (accounts, contacts, leads, auth)
+│   │   ├── api/          # Route handlers (accounts, contacts, leads, opportunities, cases, users, roles, auth, custom-field-definitions)
 │   │   ├── models/       # SQLAlchemy ORM models
 │   │   ├── schemas/      # Pydantic request/response schemas
 │   │   ├── services/     # Business logic layer
@@ -269,24 +269,23 @@ Query value   →  PostgreSQL JSONB operators + GIN index
 
 OpenSalesClaw is in **early development**. Here's what's planned:
 
-- [x] Core database schema (Accounts, Contacts, Leads, Users, CustomFieldDefinitions)
-- [x] Custom fields architecture (JSONB + metadata table)
+- [x] Core database schema (Accounts, Contacts, Leads, Opportunities, Cases, Users, Roles, CustomFieldDefinitions)
+- [x] Custom fields architecture (JSONB + metadata table + type validation)
 - [x] Alembic migration setup
-- [x] FastAPI REST endpoints — Accounts, Contacts, Leads
+- [x] FastAPI REST endpoints — Accounts, Contacts, Leads, Opportunities, Cases, Users, Roles
+- [x] Custom Field Definitions API (runtime field registration per object)
+- [x] Role-based access control (RBAC) — superuser guard + role hierarchy with cycle detection
 - [x] OAuth 2.0 authentication & JWT-based authorization
-- [x] React frontend — Dashboard, Login, Accounts list view
+- [x] React frontend — Dashboard, Login, Accounts, Contacts, Leads, Opportunities, Cases (list + detail + forms)
+- [x] Tailwind CSS v4 + shadcn/ui component library
 - [x] Docker Compose production setup with Traefik
-- [x] pytest test suite (API routes & service layer)
-- [ ] Picklist management API
-- [ ] Custom field validation against definitions
-- [ ] FastAPI REST endpoints — Opportunities, Cases, Users, Roles
+- [x] pytest test suite — 208 tests, 87%+ coverage
+- [x] CI/CD pipeline (GitHub Actions + local `make ci` runner)
+- [ ] Lead conversion (lead → account + contact + opportunity)
 - [ ] Sales objects (Products, Pricebooks, Quotes, Orders, Contracts)
 - [ ] Marketing objects (Campaigns, Campaign Members, Email Templates)
 - [ ] Activity objects (Tasks, Events, Notes, Attachments)
-- [ ] Record detail & edit views in the frontend
-- [ ] Role-based access control (RBAC)
 - [ ] Reports & Dashboards engine
-- [x] CI/CD pipeline (GitHub Actions + local `make ci` runner)
 - [ ] Import/export tooling (CSV, Salesforce migration)
 - [ ] Webhook & event system
 - [ ] Multi-tenant support

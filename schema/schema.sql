@@ -35,6 +35,7 @@ CREATE TABLE users (
     is_deleted          BOOLEAN NOT NULL DEFAULT FALSE,
     deleted_at          TIMESTAMPTZ,
     deleted_by_id       BIGINT,
+    role_id             BIGINT,              -- FK to roles; added after roles table creation
     CONSTRAINT uq_users_email UNIQUE (email)
 );
 
@@ -42,7 +43,8 @@ ALTER TABLE users
     ADD CONSTRAINT fk_users_owner_id      FOREIGN KEY (owner_id)      REFERENCES users(id),
     ADD CONSTRAINT fk_users_created_by_id FOREIGN KEY (created_by_id) REFERENCES users(id),
     ADD CONSTRAINT fk_users_updated_by_id FOREIGN KEY (updated_by_id) REFERENCES users(id),
-    ADD CONSTRAINT fk_users_deleted_by_id FOREIGN KEY (deleted_by_id) REFERENCES users(id);
+    ADD CONSTRAINT fk_users_deleted_by_id FOREIGN KEY (deleted_by_id) REFERENCES users(id),
+    ADD CONSTRAINT fk_users_role_id        FOREIGN KEY (role_id)        REFERENCES roles(id);
 
 CREATE INDEX idx_users_email      ON users (email);
 CREATE INDEX idx_users_owner_id   ON users (owner_id);
@@ -50,6 +52,36 @@ CREATE INDEX idx_users_custom_fields ON users USING GIN (custom_fields);
 
 CREATE TRIGGER trg_users_set_updated_at
     BEFORE UPDATE ON users
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+
+-- =============================================================================
+-- TABLE: roles
+-- =============================================================================
+CREATE TABLE roles (
+    id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    sfid                VARCHAR(40),
+    name                VARCHAR(255) NOT NULL,
+    parent_role_id      BIGINT REFERENCES roles(id),
+    description         TEXT,
+    custom_fields       JSONB NOT NULL DEFAULT '{}'::jsonb,
+    owner_id            BIGINT REFERENCES users(id),
+    created_by_id       BIGINT REFERENCES users(id),
+    updated_by_id       BIGINT REFERENCES users(id),
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    is_deleted          BOOLEAN NOT NULL DEFAULT FALSE,
+    deleted_at          TIMESTAMPTZ,
+    deleted_by_id       BIGINT REFERENCES users(id),
+    CONSTRAINT uq_roles_name UNIQUE (name)
+);
+
+CREATE INDEX idx_roles_parent_role_id   ON roles (parent_role_id);
+CREATE INDEX idx_roles_owner_id         ON roles (owner_id);
+CREATE INDEX idx_roles_custom_fields    ON roles USING GIN (custom_fields);
+
+CREATE TRIGGER trg_roles_set_updated_at
+    BEFORE UPDATE ON roles
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 
@@ -170,6 +202,89 @@ CREATE INDEX idx_leads_custom_fields ON leads USING GIN (custom_fields);
 
 CREATE TRIGGER trg_leads_set_updated_at
     BEFORE UPDATE ON leads
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+
+-- =============================================================================
+-- TABLE: opportunities
+-- =============================================================================
+CREATE TABLE opportunities (
+    id                      BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    sfid                    VARCHAR(40),
+    name                    VARCHAR(255) NOT NULL,
+    account_id              BIGINT REFERENCES accounts(id),
+    contact_id              BIGINT REFERENCES contacts(id),
+    stage                   VARCHAR(100) NOT NULL DEFAULT 'Prospecting',
+    probability             INTEGER CHECK (probability >= 0 AND probability <= 100),
+    amount                  NUMERIC(18, 2),
+    close_date              DATE NOT NULL,
+    type                    VARCHAR(100),
+    lead_source             VARCHAR(100),
+    next_step               VARCHAR(255),
+    description             TEXT,
+    is_won                  BOOLEAN NOT NULL DEFAULT FALSE,
+    is_closed               BOOLEAN NOT NULL DEFAULT FALSE,
+    closed_at               TIMESTAMPTZ,
+    custom_fields           JSONB NOT NULL DEFAULT '{}'::jsonb,
+    owner_id                BIGINT REFERENCES users(id),
+    created_by_id           BIGINT REFERENCES users(id),
+    updated_by_id           BIGINT REFERENCES users(id),
+    created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    is_deleted              BOOLEAN NOT NULL DEFAULT FALSE,
+    deleted_at              TIMESTAMPTZ,
+    deleted_by_id           BIGINT REFERENCES users(id)
+);
+
+CREATE INDEX idx_opportunities_account_id     ON opportunities (account_id);
+CREATE INDEX idx_opportunities_stage          ON opportunities (stage);
+CREATE INDEX idx_opportunities_close_date     ON opportunities (close_date);
+CREATE INDEX idx_opportunities_owner_id       ON opportunities (owner_id);
+CREATE INDEX idx_opportunities_custom_fields  ON opportunities USING GIN (custom_fields);
+
+CREATE TRIGGER trg_opportunities_set_updated_at
+    BEFORE UPDATE ON opportunities
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+
+-- =============================================================================
+-- TABLE: cases
+-- =============================================================================
+CREATE TABLE cases (
+    id                      BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    sfid                    VARCHAR(40),
+    case_number             VARCHAR(30),
+    account_id              BIGINT REFERENCES accounts(id),
+    contact_id              BIGINT REFERENCES contacts(id),
+    subject                 VARCHAR(255) NOT NULL,
+    description             TEXT,
+    status                  VARCHAR(100) NOT NULL DEFAULT 'New',
+    priority                VARCHAR(50) NOT NULL DEFAULT 'Medium',
+    origin                  VARCHAR(100),
+    type                    VARCHAR(100),
+    reason                  VARCHAR(255),
+    closed_at               TIMESTAMPTZ,
+    custom_fields           JSONB NOT NULL DEFAULT '{}'::jsonb,
+    owner_id                BIGINT REFERENCES users(id),
+    created_by_id           BIGINT REFERENCES users(id),
+    updated_by_id           BIGINT REFERENCES users(id),
+    created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    is_deleted              BOOLEAN NOT NULL DEFAULT FALSE,
+    deleted_at              TIMESTAMPTZ,
+    deleted_by_id           BIGINT REFERENCES users(id),
+    CONSTRAINT uq_cases_case_number UNIQUE (case_number)
+);
+
+CREATE INDEX idx_cases_account_id      ON cases (account_id);
+CREATE INDEX idx_cases_contact_id      ON cases (contact_id);
+CREATE INDEX idx_cases_status          ON cases (status);
+CREATE INDEX idx_cases_priority        ON cases (priority);
+CREATE INDEX idx_cases_owner_id        ON cases (owner_id);
+CREATE INDEX idx_cases_custom_fields   ON cases USING GIN (custom_fields);
+
+CREATE TRIGGER trg_cases_set_updated_at
+    BEFORE UPDATE ON cases
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 

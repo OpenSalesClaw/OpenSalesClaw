@@ -20,8 +20,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.security import hash_password
 from app.models.account import Account
+from app.models.case import Case
 from app.models.contact import Contact
 from app.models.lead import Lead
+from app.models.opportunity import Opportunity
+from app.models.role import Role
 from app.models.user import User
 
 logger = logging.getLogger(__name__)
@@ -113,6 +116,31 @@ class _LeadData:
     status: str
     lead_source: str
     industry: str
+
+
+@dataclass
+class _RoleData:
+    name: str
+    description: str
+
+
+@dataclass
+class _OpportunityData:
+    name: str
+    account_name: str
+    stage: str
+    amount: float
+    close_date: str  # ISO date string YYYY-MM-DD
+
+
+@dataclass
+class _CaseData:
+    subject: str
+    account_name: str
+    description: str
+    status: str
+    priority: str
+    origin: str
 
 
 _ACCOUNTS: list[_AccountData] = [
@@ -1081,6 +1109,116 @@ _LEADS: list[_LeadData] = [
 ]
 
 
+_ROLES: list[_RoleData] = [
+    _RoleData("Executive", "C-suite and VP-level executives with full visibility."),
+    _RoleData("Sales Manager", "Manages the sales team and approves deals."),
+    _RoleData("Sales Representative", "Handles direct sales, accounts, and opportunities."),
+    _RoleData("Account Manager", "Manages ongoing customer relationships."),
+    _RoleData("Support Agent", "Handles customer cases and support tickets."),
+]
+
+_OPPORTUNITIES: list[_OpportunityData] = [
+    _OpportunityData("Acme Platform Expansion", "Acme Corporation", "Proposal/Price Quote", 125_000, "2025-09-30"),
+    _OpportunityData("Globex Energy Suite", "Globex Industries", "Value Proposition", 320_000, "2025-08-15"),
+    _OpportunityData("Stark AI Integration", "Stark Enterprises", "Perception Analysis", 540_000, "2025-10-31"),
+    _OpportunityData("Wayne Security Upgrade", "Wayne Industries", "Closed Won", 180_000, "2025-06-01"),
+    _OpportunityData("Initech SaaS Migration", "Initech Solutions", "Needs Analysis", 65_000, "2025-11-15"),
+    _OpportunityData("Weyland Field Ops Tools", "Weyland-Yutani", "Id. Decision Makers", 275_000, "2025-12-01"),
+    _OpportunityData("Pied Piper Dev Platform", "Pied Piper", "Qualification", 42_000, "2025-09-01"),
+    _OpportunityData("Dunder Mifflin CRM", "Dunder Mifflin", "Prospecting", 28_000, "2025-10-01"),
+    _OpportunityData("Oscorp Biotech Analytics", "Oscorp", "Proposal/Price Quote", 210_000, "2025-07-31"),
+    _OpportunityData("LexCorp Grid Monitoring", "LexCorp", "Value Proposition", 390_000, "2025-11-01"),
+    _OpportunityData("Capsule ERP Rollout", "Capsule Corporation", "Closed Won", 480_000, "2025-05-15"),
+    _OpportunityData("Cyberdyne AI Contract", "Cyberdyne Systems", "Needs Analysis", 150_000, "2026-01-15"),
+    _OpportunityData("Tyrell Biodata Platform", "Tyrell Corporation", "Proposal/Price Quote", 620_000, "2025-08-30"),
+    _OpportunityData("Momcorp Fleet Mgmt", "Momcorp", "Closed Won", 730_000, "2025-04-30"),
+    _OpportunityData("Hooli Enterprise Deal", "Hooli", "Prospecting", 900_000, "2026-03-01"),
+]
+
+_CASES: list[_CaseData] = [
+    _CaseData(
+        "Integration API returning 500 on bulk import",
+        "Acme Corporation",
+        "The bulk import endpoint fails intermittently under load.",
+        "Open",
+        "High",
+        "Web",
+    ),
+    _CaseData(
+        "Dashboard charts not loading for EU users",
+        "Globex Industries",
+        "Users in the EU region report blank dashboards.",
+        "In Progress",
+        "Medium",
+        "Email",
+    ),
+    _CaseData(
+        "Billing discrepancy on March invoice",
+        "Stark Enterprises",
+        "Invoice shows incorrect quantity for premium seats.",
+        "Open",
+        "High",
+        "Phone",
+    ),
+    _CaseData(
+        "Password reset email not received",
+        "Wayne Industries",
+        "Multiple users unable to request password reset.",
+        "Closed",
+        "Medium",
+        "Email",
+    ),
+    _CaseData(
+        "Feature request: bulk CSV export",
+        "Initech Solutions",
+        "Customer wants to export records as CSV from the UI.",
+        "Open",
+        "Low",
+        "Web",
+    ),
+    _CaseData(
+        "Mobile app crashes on login",
+        "Weyland-Yutani",
+        "Android app crashes immediately after entering credentials.",
+        "In Progress",
+        "Critical",
+        "Phone",
+    ),
+    _CaseData(
+        "SAML SSO configuration assistance",
+        "Oscorp",
+        "Need help setting up SAML 2.0 SSO with Azure AD.",
+        "Open",
+        "Medium",
+        "Email",
+    ),
+    _CaseData(
+        "Report scheduler not firing",
+        "LexCorp",
+        "Scheduled reports stopped sending after the last update.",
+        "Closed",
+        "High",
+        "Web",
+    ),
+    _CaseData(
+        "Data migration from legacy system",
+        "Capsule Corporation",
+        "Assistance needed migrating 50k records from old CRM.",
+        "Open",
+        "Medium",
+        "Partner",
+    ),
+    _CaseData(
+        "Performance degradation on large account views",
+        "Tyrell Corporation",
+        "Account detail pages time out with 10k+ contacts.",
+        "In Progress",
+        "High",
+        "Web",
+    ),
+]
+
+
 # ---------------------------------------------------------------------------
 # Seeding orchestration
 # ---------------------------------------------------------------------------
@@ -1164,9 +1302,58 @@ async def seed_demo_data(db: AsyncSession, admin_user: User) -> None:
         db.add(lead)
 
     await db.flush()
+
+    # ------------------------------------------------------------------
+    # Roles
+    # ------------------------------------------------------------------
+    for r in _ROLES:
+        role = Role(
+            name=r.name,
+            description=r.description,
+            **audit,
+        )
+        db.add(role)
+
+    # ------------------------------------------------------------------
+    # Opportunities
+    # ------------------------------------------------------------------
+    from datetime import date  # noqa: PLC0415
+
+    for o in _OPPORTUNITIES:
+        parent = account_map.get(o.account_name)
+        opp = Opportunity(
+            name=o.name,
+            account_id=parent.id if parent else None,
+            stage=o.stage,
+            amount=o.amount,
+            close_date=date.fromisoformat(o.close_date),
+            **audit,
+        )
+        db.add(opp)
+
+    # ------------------------------------------------------------------
+    # Cases
+    # ------------------------------------------------------------------
+    for c_data in _CASES:
+        parent = account_map.get(c_data.account_name)
+        case = Case(
+            subject=c_data.subject,
+            account_id=parent.id if parent else None,
+            description=c_data.description,
+            status=c_data.status,
+            priority=c_data.priority,
+            origin=c_data.origin,
+            **audit,
+        )
+        db.add(case)
+
+    await db.flush()
     logger.info(
-        "Demo data seeded — %d accounts, %d contacts, %d leads.",
+        "Demo data seeded — %d accounts, %d contacts, %d leads, %d opportunities, %d cases, %d roles.",
         len(_ACCOUNTS),
         len(_CONTACTS),
         len(_LEADS),
+        len(_OPPORTUNITIES),
+        len(_CASES),
+        len(_ROLES),
     )
