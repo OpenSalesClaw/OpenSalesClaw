@@ -43,9 +43,10 @@ OpenSalesClaw is an open-source, self-hostable CRM platform modeled after Salesf
 │   │   └── main.py       # FastAPI app entry point
 │   ├── alembic/          # Database migrations
 │   ├── tests/            # pytest test suite
-│   └── requirements.txt
+│   └── pyproject.toml
 ├── frontend/             # React + Vite application (TypeScript)
 ├── docker-compose.yml
+├── Makefile              # Local CI runner — mirrors GitHub Actions pipeline
 └── README.md
 ```
 
@@ -195,12 +196,33 @@ class Account(Base):
 
 ---
 
+## Local CI
+
+A `Makefile` at the repo root mirrors the GitHub Actions pipeline (`.github/workflows/ci.yml`).
+
+```bash
+make ci              # full pipeline: lint + test + build
+make lint            # ruff check, ruff format --check, mypy, eslint, tsc
+make lint-backend    # backend linting only
+make lint-frontend   # frontend linting only
+make test            # pytest (with coverage) + tsc
+make test-backend    # pytest --cov --cov-fail-under=80 (auto-starts DB)
+make build           # docker compose build --no-cache
+```
+
+- **Always run `make ci` before opening a PR** to catch failures locally.
+- `make test-backend` starts the `db` Docker service and creates `opensalesclaw_test` automatically.
+- Environment variables (`DATABASE_URL`, `SECRET_KEY`, etc.) are set by the Makefile to match CI values exactly — do not override them for test runs.
+
+---
+
 ## Git & Workflow Conventions
 
 - Branch naming: `feature/<short-description>`, `fix/<short-description>`, `chore/<short-description>`.
 - Commit messages: imperative mood, concise (`Add account list endpoint`, `Fix lead conversion logic`).
 - PRs should reference an issue when one exists.
 - Keep PRs focused — one feature or fix per PR.
+- Run `make ci` locally before pushing — the pipeline must pass before a PR is ready for review.
 
 ---
 

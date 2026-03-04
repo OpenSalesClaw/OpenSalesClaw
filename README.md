@@ -136,6 +136,29 @@ npm run dev        # Vite dev server at http://localhost:5173
 
 > **Note:** Set `CORS_ORIGINS=["http://localhost:5173"]` in your `.env` when running the frontend via Vite.
 
+### Running CI locally
+
+A `Makefile` at the repo root mirrors every step of the GitHub Actions pipeline so you can validate your changes before pushing.
+
+**Prerequisites:** `uv`, Node.js 20+, Docker with the Compose plugin.
+
+```bash
+# Full pipeline — lint, test, build (same as CI)
+make ci
+
+# Individual stages
+make lint              # ruff + mypy + eslint + tsc
+make lint-backend      # ruff check, ruff format --check, mypy
+make lint-frontend     # eslint, tsc --noEmit
+make test              # pytest (with coverage) + tsc
+make test-backend      # pytest --cov --cov-fail-under=80 (starts DB automatically)
+make build             # docker compose build --no-cache
+```
+
+`make test-backend` automatically starts the `db` service via Docker Compose and creates an `opensalesclaw_test` database if it does not exist. It exports the same environment variables used in CI, so results are directly comparable.
+
+Run `make help` to list all available targets.
+
 ---
 
 ## Seeding
@@ -235,6 +258,7 @@ Query value   →  PostgreSQL JSONB operators + GIN index
 │       ├── pages/        # Route-level page components
 │       └── stores/       # Zustand state stores
 ├── docker-compose.yml
+├── Makefile              # Local CI runner (mirrors GitHub Actions)
 ├── .env.example
 └── README.md
 ```
@@ -262,7 +286,7 @@ OpenSalesClaw is in **early development**. Here's what's planned:
 - [ ] Record detail & edit views in the frontend
 - [ ] Role-based access control (RBAC)
 - [ ] Reports & Dashboards engine
-- [ ] CI/CD pipeline (GitHub Actions)
+- [x] CI/CD pipeline (GitHub Actions + local `make ci` runner)
 - [ ] Import/export tooling (CSV, Salesforce migration)
 - [ ] Webhook & event system
 - [ ] Multi-tenant support
