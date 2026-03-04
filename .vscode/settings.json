@@ -3,6 +3,7 @@
         "uv": true,
         "npm install": true,
         "docker compose": true,
-        "npx eslint": true
+        "npx eslint": true,
+        "npx tsc": true
     }
 }
