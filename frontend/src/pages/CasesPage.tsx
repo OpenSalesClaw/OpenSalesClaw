@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useEntityCRUD } from '@/lib/hooks/useEntityCRUD'
 
 const PAGE_SIZE = 20
-const STATUSES = ['New', 'Working', 'Escalated', 'Closed']
+const STATUSES = ['New', 'Open', 'In Progress', 'Working', 'Escalated', 'Closed']
 const PRIORITIES = ['Low', 'Medium', 'High', 'Critical']
 
 function priorityVariant(p: string): 'default' | 'secondary' | 'destructive' | 'outline' {

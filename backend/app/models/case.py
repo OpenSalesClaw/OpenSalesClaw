@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from app.models.account import Account
     from app.models.contact import Contact
 
-CASE_STATUSES: list[str] = ["New", "Working", "Escalated", "Closed"]
+CASE_STATUSES: list[str] = ["New", "Open", "In Progress", "Working", "Escalated", "Closed"]
 CASE_PRIORITIES: list[str] = ["Low", "Medium", "High", "Critical"]
 
 

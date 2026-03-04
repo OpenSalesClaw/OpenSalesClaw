@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-const STATUSES = ['New', 'Working', 'Escalated', 'Closed']
+const STATUSES = ['New', 'Open', 'In Progress', 'Working', 'Escalated', 'Closed']
 const PRIORITIES = ['Low', 'Medium', 'High', 'Critical']
 
 function priorityVariant(p: string): 'default' | 'secondary' | 'destructive' | 'outline' {
