@@ -62,7 +62,7 @@ export interface AccountCreate {
   custom_fields?: Record<string, unknown>
 }
 
-export interface AccountUpdate extends Partial<AccountCreate> {}
+export type AccountUpdate = Partial<AccountCreate>
 
 // ---------------------------------------------------------------------------
 // Contact
@@ -99,7 +99,7 @@ export interface ContactCreate {
   custom_fields?: Record<string, unknown>
 }
 
-export interface ContactUpdate extends Partial<ContactCreate> {}
+export type ContactUpdate = Partial<ContactCreate>
 
 // ---------------------------------------------------------------------------
 // Lead
@@ -136,7 +136,7 @@ export interface LeadCreate {
   custom_fields?: Record<string, unknown>
 }
 
-export interface LeadUpdate extends Partial<LeadCreate> {}
+export type LeadUpdate = Partial<LeadCreate>
 
 // ---------------------------------------------------------------------------
 // Opportunity
@@ -174,7 +174,7 @@ export interface OpportunityCreate {
   custom_fields?: Record<string, unknown>
 }
 
-export interface OpportunityUpdate extends Partial<OpportunityCreate> {}
+export type OpportunityUpdate = Partial<OpportunityCreate>
 
 export interface PipelineStage {
   stage: string
@@ -213,4 +213,4 @@ export interface CaseCreate {
   custom_fields?: Record<string, unknown>
 }
 
-export interface CaseUpdate extends Partial<CaseCreate> {}
+export type CaseUpdate = Partial<CaseCreate>

@@ -15,9 +15,7 @@ _CLOSED_STATUS = "Closed"
 
 async def _generate_case_number(db: AsyncSession) -> str:
     """Generate the next sequential case number in CS-NNNNN format."""
-    result = await db.execute(
-        select(func.max(Case.case_number)).where(Case.case_number.is_not(None))
-    )
+    result = await db.execute(select(func.max(Case.case_number)).where(Case.case_number.is_not(None)))
     max_number = result.scalar_one_or_none()
     if max_number:
         try:

@@ -45,7 +45,7 @@ _DESCRIPTION = """
 All endpoints (except `/api/auth/login`) require a Bearer token obtained from `/api/auth/login`.
 """
 
-_TAGS_METADATA: list[dict] = [
+_TAGS_METADATA: list[dict[str, Any]] = [
     {"name": "auth", "description": "Authentication – obtain and refresh JWT tokens."},
     {"name": "accounts", "description": "Company or organisation records."},
     {"name": "contacts", "description": "Individual people associated with accounts."},

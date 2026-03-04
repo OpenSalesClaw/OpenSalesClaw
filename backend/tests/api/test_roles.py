@@ -8,7 +8,6 @@ from httpx import AsyncClient
 
 from tests.helpers import create_role
 
-
 # ---------------------------------------------------------------------------
 # List
 # ---------------------------------------------------------------------------
@@ -81,7 +80,9 @@ async def test_create_role_requires_name(client: AsyncClient, superuser_headers:
 # ---------------------------------------------------------------------------
 
 
-async def test_get_role_by_id(client: AsyncClient, auth_headers: dict[str, str], superuser_headers: dict[str, str]) -> None:
+async def test_get_role_by_id(
+    client: AsyncClient, auth_headers: dict[str, str], superuser_headers: dict[str, str]
+) -> None:
     role = await create_role(client, superuser_headers, name="CTO")
     resp = await client.get(f"/api/roles/{role['id']}", headers=auth_headers)
     assert resp.status_code == 200
@@ -106,7 +107,9 @@ async def test_update_role(client: AsyncClient, superuser_headers: dict[str, str
     assert resp.json()["name"] == "New Role Name"
 
 
-async def test_update_role_non_admin_gets_403(client: AsyncClient, auth_headers: dict[str, str], superuser_headers: dict[str, str]) -> None:
+async def test_update_role_non_admin_gets_403(
+    client: AsyncClient, auth_headers: dict[str, str], superuser_headers: dict[str, str]
+) -> None:
     role = await create_role(client, superuser_headers, name="Should Not Change")
     resp = await client.patch(f"/api/roles/{role['id']}", json={"name": "Hacked"}, headers=auth_headers)
     assert resp.status_code == 403
@@ -122,7 +125,9 @@ async def test_update_role_not_found(client: AsyncClient, superuser_headers: dic
 # ---------------------------------------------------------------------------
 
 
-async def test_hierarchy_endpoint(client: AsyncClient, auth_headers: dict[str, str], superuser_headers: dict[str, str]) -> None:
+async def test_hierarchy_endpoint(
+    client: AsyncClient, auth_headers: dict[str, str], superuser_headers: dict[str, str]
+) -> None:
     parent = await create_role(client, superuser_headers, name="Hierarchy VP")
     await client.post(
         "/api/roles",
@@ -189,7 +194,9 @@ async def test_deleted_role_returns_404(client: AsyncClient, superuser_headers: 
     assert resp.status_code == 404
 
 
-async def test_delete_role_non_admin_gets_403(client: AsyncClient, auth_headers: dict[str, str], superuser_headers: dict[str, str]) -> None:
+async def test_delete_role_non_admin_gets_403(
+    client: AsyncClient, auth_headers: dict[str, str], superuser_headers: dict[str, str]
+) -> None:
     role = await create_role(client, superuser_headers, name="Protected Role")
     resp = await client.delete(f"/api/roles/{role['id']}", headers=auth_headers)
     assert resp.status_code == 403

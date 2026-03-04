@@ -29,9 +29,7 @@ class CustomFieldDefinitionService(
             query = query.where(CustomFieldDefinition.object_name == object_name)
         return query
 
-    async def get_definitions_for_object(
-        self, db: AsyncSession, object_name: str
-    ) -> list[CustomFieldDefinition]:
+    async def get_definitions_for_object(self, db: AsyncSession, object_name: str) -> list[CustomFieldDefinition]:
         result = await db.execute(
             select(CustomFieldDefinition)
             .where(
@@ -42,9 +40,7 @@ class CustomFieldDefinitionService(
         )
         return list(result.scalars().all())
 
-    async def validate_custom_fields(
-        self, db: AsyncSession, object_name: str, custom_fields: dict[str, Any]
-    ) -> None:
+    async def validate_custom_fields(self, db: AsyncSession, object_name: str, custom_fields: dict[str, Any]) -> None:
         """Validate custom_fields dict against definitions for the given object.
 
         Raises ValidationError if:
@@ -97,11 +93,10 @@ class CustomFieldDefinitionService(
                         raise ValidationError(f"Custom field '{field_name}' must be a date string (YYYY-MM-DD).")
                     try:
                         from datetime import date
+
                         date.fromisoformat(value)
                     except ValueError:
-                        raise ValidationError(
-                            f"Custom field '{field_name}' must be a valid date string (YYYY-MM-DD)."
-                        )
+                        raise ValidationError(f"Custom field '{field_name}' must be a valid date string (YYYY-MM-DD).")
                 case FieldType.datetime:
                     if not isinstance(value, str):
                         raise ValidationError(f"Custom field '{field_name}' must be a datetime string.")

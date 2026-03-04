@@ -24,9 +24,7 @@ async def list_custom_field_definitions(
     pagination: Annotated[PaginationParams, Depends()],
     object_name: str | None = Query(default=None, description="Filter by object name (e.g. 'accounts')"),
 ) -> PaginatedResponse[CustomFieldDefinitionRead]:
-    items, total = await cfd_service.list_custom_field_definitions(
-        db, pagination, object_name=object_name
-    )
+    items, total = await cfd_service.list_custom_field_definitions(db, pagination, object_name=object_name)
     return PaginatedResponse(items=items, total=total, offset=pagination.offset, limit=pagination.limit)  # type: ignore[arg-type]
 
 

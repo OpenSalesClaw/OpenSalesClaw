@@ -14,9 +14,7 @@ class Role(BaseEntity):
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(always=True), primary_key=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
-    parent_role_id: Mapped[int | None] = mapped_column(
-        BigInteger, ForeignKey("roles.id"), nullable=True, index=True
-    )
+    parent_role_id: Mapped[int | None] = mapped_column(BigInteger, ForeignKey("roles.id"), nullable=True, index=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Self-referential relationships

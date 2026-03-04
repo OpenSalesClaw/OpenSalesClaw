@@ -241,9 +241,7 @@ async def test_update_opportunity_name(client: AsyncClient, auth_headers: dict[s
 
 async def test_update_stage_changes_is_won(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     opp = await create_opportunity(client, auth_headers)
-    resp = await client.patch(
-        f"/api/opportunities/{opp['id']}", json={"stage": "Closed Won"}, headers=auth_headers
-    )
+    resp = await client.patch(f"/api/opportunities/{opp['id']}", json={"stage": "Closed Won"}, headers=auth_headers)
     assert resp.status_code == 200
     data = resp.json()
     assert data["is_won"] is True
@@ -252,9 +250,7 @@ async def test_update_stage_changes_is_won(client: AsyncClient, auth_headers: di
 
 async def test_update_stage_closed_lost(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     opp = await create_opportunity(client, auth_headers)
-    resp = await client.patch(
-        f"/api/opportunities/{opp['id']}", json={"stage": "Closed Lost"}, headers=auth_headers
-    )
+    resp = await client.patch(f"/api/opportunities/{opp['id']}", json={"stage": "Closed Lost"}, headers=auth_headers)
     assert resp.status_code == 200
     data = resp.json()
     assert data["is_won"] is False

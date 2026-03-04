@@ -1,6 +1,6 @@
 """Pydantic schemas for CustomFieldDefinition."""
 
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, model_validator
@@ -8,7 +8,7 @@ from pydantic import BaseModel, model_validator
 from app.schemas.base import StandardReadFields
 
 
-class FieldType(str, Enum):
+class FieldType(StrEnum):
     text = "text"
     number = "number"
     date = "date"

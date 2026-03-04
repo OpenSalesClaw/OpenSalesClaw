@@ -154,7 +154,6 @@ async def superuser_headers(client: AsyncClient, db: AsyncSession) -> dict[str, 
     """Register a test superuser, promote to superuser, and return auth headers."""
     from sqlalchemy import select
 
-    from app.core.security import hash_password
     from app.models.user import User as UserModel
 
     await client.post(
@@ -167,9 +166,7 @@ async def superuser_headers(client: AsyncClient, db: AsyncSession) -> dict[str, 
         },
     )
     # Directly promote to superuser in the test session
-    result = await db.execute(
-        select(UserModel).where(UserModel.email == _TEST_SUPERUSER_EMAIL)
-    )
+    result = await db.execute(select(UserModel).where(UserModel.email == _TEST_SUPERUSER_EMAIL))
     user = result.scalars().first()
     assert user is not None
     user.is_superuser = True

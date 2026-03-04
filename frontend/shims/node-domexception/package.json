@@ -1,0 +1,7 @@
+{
+  "name": "node-domexception",
+  "version": "1.0.0",
+  "description": "Local shim — uses platform-native DOMException (Node 18+)",
+  "main": "index.js",
+  "license": "MIT"
+}

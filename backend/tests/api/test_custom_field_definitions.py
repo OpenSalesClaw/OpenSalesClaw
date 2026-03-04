@@ -206,9 +206,7 @@ async def test_account_accepts_valid_text_custom_field(
 async def test_account_rejects_wrong_type_custom_field(
     client: AsyncClient, auth_headers: dict[str, str], superuser_headers: dict[str, str]
 ) -> None:
-    await _create_definition(
-        client, superuser_headers, object_name="accounts", field_name="score", field_type="number"
-    )
+    await _create_definition(client, superuser_headers, object_name="accounts", field_name="score", field_type="number")
     resp = await client.post(
         "/api/accounts",
         json={"name": "Bad Type Corp", "custom_fields": {"score": "not-a-number"}},

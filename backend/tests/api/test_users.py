@@ -5,8 +5,6 @@ RBAC enforcement (non-admin gets 403), and auth requirements.
 """
 
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
-
 
 # ---------------------------------------------------------------------------
 # List users (admin-only)

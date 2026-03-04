@@ -48,7 +48,7 @@ class RoleService(CRUDService[Role, RoleCreate, RoleUpdate]):
 
     async def get_hierarchy(self, db: AsyncSession) -> list[dict[str, Any]]:
         """Return all roles as a flat list with parent info for tree construction."""
-        items, _ = await self.list(db, type("P", (), {"offset": 0, "limit": 1000})())  # type: ignore[call-arg]
+        items, _ = await self.list(db, type("P", (), {"offset": 0, "limit": 1000})())
         return [
             {
                 "id": role.id,

@@ -8,7 +8,6 @@ from httpx import AsyncClient
 
 from tests.helpers import create_account, create_case, create_contact
 
-
 # ---------------------------------------------------------------------------
 # List
 # ---------------------------------------------------------------------------
@@ -148,9 +147,7 @@ async def test_create_case_invalid_priority(client: AsyncClient, auth_headers: d
 
 
 async def test_create_sets_closed_at_when_status_closed(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    resp = await client.post(
-        "/api/cases", json={"subject": "Already Closed", "status": "Closed"}, headers=auth_headers
-    )
+    resp = await client.post("/api/cases", json={"subject": "Already Closed", "status": "Closed"}, headers=auth_headers)
     assert resp.status_code == 201
     # closed_at is not in the CaseRead schema but we verify the case was created
     assert resp.json()["status"] == "Closed"

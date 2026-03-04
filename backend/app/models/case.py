@@ -20,12 +20,8 @@ class Case(BaseEntity):
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(always=True), primary_key=True)
     case_number: Mapped[str | None] = mapped_column(String(30), nullable=True, unique=True)
-    account_id: Mapped[int | None] = mapped_column(
-        BigInteger, ForeignKey("accounts.id"), nullable=True, index=True
-    )
-    contact_id: Mapped[int | None] = mapped_column(
-        BigInteger, ForeignKey("contacts.id"), nullable=True, index=True
-    )
+    account_id: Mapped[int | None] = mapped_column(BigInteger, ForeignKey("accounts.id"), nullable=True, index=True)
+    contact_id: Mapped[int | None] = mapped_column(BigInteger, ForeignKey("contacts.id"), nullable=True, index=True)
     subject: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[str] = mapped_column(String(100), nullable=False, server_default="New", index=True)

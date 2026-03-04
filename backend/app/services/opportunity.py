@@ -39,9 +39,7 @@ class OpportunityService(CRUDService[Opportunity, OpportunityCreate, Opportunity
             query = query.where(Opportunity.close_date <= close_date_to)
         return query
 
-    async def create(
-        self, db: AsyncSession, data: OpportunityCreate, created_by_id: int | None = None
-    ) -> Opportunity:
+    async def create(self, db: AsyncSession, data: OpportunityCreate, created_by_id: int | None = None) -> Opportunity:
         payload = data.model_dump()
 
         # Auto-set probability from stage defaults if not provided
@@ -97,10 +95,7 @@ class OpportunityService(CRUDService[Opportunity, OpportunityCreate, Opportunity
             .group_by(Opportunity.stage)
         )
         rows = result.all()
-        return [
-            {"stage": row.stage, "count": row.count, "total_amount": float(row.total_amount)}
-            for row in rows
-        ]
+        return [{"stage": row.stage, "count": row.count, "total_amount": float(row.total_amount)} for row in rows]
 
 
 opportunity_service = OpportunityService()

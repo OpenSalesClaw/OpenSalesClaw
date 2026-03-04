@@ -41,18 +41,12 @@ DEFAULT_STAGE_PROBABILITIES: dict[str, int] = {
 
 class Opportunity(BaseEntity):
     __tablename__ = "opportunities"
-    __table_args__ = (
-        CheckConstraint("probability >= 0 AND probability <= 100", name="probability"),
-    )
+    __table_args__ = (CheckConstraint("probability >= 0 AND probability <= 100", name="probability"),)
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(always=True), primary_key=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    account_id: Mapped[int | None] = mapped_column(
-        BigInteger, ForeignKey("accounts.id"), nullable=True, index=True
-    )
-    contact_id: Mapped[int | None] = mapped_column(
-        BigInteger, ForeignKey("contacts.id"), nullable=True
-    )
+    account_id: Mapped[int | None] = mapped_column(BigInteger, ForeignKey("accounts.id"), nullable=True, index=True)
+    contact_id: Mapped[int | None] = mapped_column(BigInteger, ForeignKey("contacts.id"), nullable=True)
     stage: Mapped[str] = mapped_column(String(100), nullable=False, server_default="Prospecting", index=True)
     probability: Mapped[int | None] = mapped_column(Integer, nullable=True)
     amount: Mapped[Decimal | None] = mapped_column(Numeric(18, 2), nullable=True)
