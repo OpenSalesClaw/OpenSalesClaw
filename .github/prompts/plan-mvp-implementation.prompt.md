@@ -24,7 +24,7 @@ Each phase follows the established entity checklist: SQL table → Alembic migra
 | **Database** | 5 tables (users, accounts, contacts, leads, custom_field_definitions), `set_updated_at` triggers, GIN indexes on `custom_fields` |
 | **Base Infrastructure** | `StandardColumns` mixin, generic `CRUDService`, `PaginatedResponse`, exception hierarchy, async sessions, pydantic-settings config |
 | **Docker** (T-ARCH-003/004) | Dev + prod compose with Traefik, multi-stage Dockerfiles, Alembic in entrypoint |
-| **Frontend Scaffold** (T-ARCH-002) | React 19 + Vite + TypeScript, Zustand auth store, Axios client, Layout with sidebar, LoginPage, AccountsPage (list + create) |
+| **Frontend Scaffold** (T-ARCH-002) | React 19 + Vite + TypeScript, Zustand auth store, Axios client, Layout with sidebar, LoginPage, AccountsPage (list + create). **Note:** Tailwind CSS + shadcn/ui are not yet installed — required before Phase 6. |
 | **Tests** | ~86 backend tests, conftest with rollback isolation, `httpx.AsyncClient` |
 
 ---
@@ -397,12 +397,18 @@ Update FEATURES.md to reflect actual codebase state. The following items are lis
 
 ### Steps
 
-1. **Shared components** — Create reusable components in `frontend/src/components/`:
-   - `DataTable.tsx` — generic sortable, paginated table. Accepts column definitions (`{key, label, render?}`) and data array. Pagination controls (prev/next, page size).
-   - `RecordForm.tsx` — generic form component. Accepts field definitions and renders appropriate inputs (text, number, date, select/picklist, textarea, email, url, phone).
-   - `DetailView.tsx` — generic read-only record view with field labels and values, edit button.
-   - `DeleteConfirmDialog.tsx` — confirmation modal for soft-delete actions.
-   - `FilterBar.tsx` — horizontal filter bar with dynamic filter inputs per entity.
+1. **shadcn/ui setup** (prerequisite — do this first):
+   - Install Tailwind CSS and its Vite plugin: `npm install tailwindcss @tailwindcss/vite`
+   - Initialize shadcn/ui: `npx shadcn@latest init` (choose a base color, confirm `src/index.css` for CSS variables)
+   - Install required shadcn/ui components: `npx shadcn@latest add button input table dialog form select badge toast`
+   - Verify `frontend/src/components/ui/` is populated and `tailwind.config.ts` / `vite.config.ts` are updated
+
+2. **Shared components** — Create reusable components in `frontend/src/components/`. Build on shadcn/ui primitives — do **not** hand-roll base UI elements:
+   - `DataTable.tsx` — generic sortable, paginated table. Wrap the shadcn/ui `Table` primitive. Accepts column definitions (`{key, label, render?}`) and data array. Pagination controls use shadcn/ui `Button`.
+   - `RecordForm.tsx` — generic form component. Wrap shadcn/ui `Form`, `Input`, `Select`, and `Textarea` primitives. Accepts field definitions and renders appropriate inputs (text, number, date, select/picklist, textarea, email, url, phone).
+   - `DetailView.tsx` — generic read-only record view with field labels, values, and an edit `Button`.
+   - `DeleteConfirmDialog.tsx` — confirmation modal built on the shadcn/ui `Dialog` primitive.
+   - `FilterBar.tsx` — horizontal filter bar using shadcn/ui `Input`, `Select`, and `Button` components.
 
 2. **API types & modules** — Create in `frontend/src/api/`:
    - `types.ts` — TypeScript interfaces for all entities matching Pydantic `Read` schemas + `PaginatedResponse<T>` generic

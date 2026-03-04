@@ -16,6 +16,7 @@ OpenSalesClaw is an open-source, self-hostable CRM platform modeled after Salesf
 | Validation        | Pydantic v2                 |
 | Auth              | OAuth 2.0                   |
 | Frontend          | React + Vite + TypeScript   |
+| UI Components     | shadcn/ui (Radix UI + Tailwind CSS) |
 | Containers        | Docker & Docker Compose     |
 | Reverse Proxy     | Traefik                     |
 | CI/CD             | GitHub Actions              |
@@ -182,6 +183,15 @@ class Account(Base):
 - API calls via a centralized API client (e.g., `frontend/src/api/client.ts`).
 - Use **React Router** for routing.
 - State management: React Context or Zustand (avoid Redux unless complexity warrants it).
+
+### UI Components (shadcn/ui)
+
+- Use **shadcn/ui** as the primary component library. It is built on **Radix UI** primitives and styled with **Tailwind CSS**.
+- Add new components via the shadcn CLI: `npx shadcn@latest add <component>`.
+- Installed components live in `frontend/src/components/ui/` — do not edit them directly; prefer wrapping them.
+- Use Tailwind utility classes for layout and spacing; avoid writing custom CSS unless absolutely necessary.
+- Follow the shadcn/ui theming system: customise design tokens in `frontend/src/index.css` (CSS variables) rather than overriding component styles inline.
+- Prefer shadcn/ui primitives (`Button`, `Input`, `Dialog`, `Table`, `Select`, etc.) over custom or third-party equivalents.
 
 ---
 

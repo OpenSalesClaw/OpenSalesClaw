@@ -387,7 +387,8 @@
 | ID | Feature | Description | Priority | Status |
 |----|---------|-------------|----------|--------|
 | T-ARCH-001 | FastAPI Application Scaffold | Project structure with routers, models, schemas, services | MVP | Not Started |
-| T-ARCH-002 | React + Vite Scaffold | Frontend project with TypeScript, routing, and API client | MVP | Not Started |
+| T-ARCH-002 | React + Vite Scaffold | Frontend project with TypeScript, routing, API client, and Tailwind CSS + shadcn/ui | MVP | Not Started |
+| T-ARCH-002a | shadcn/ui Setup | Install Tailwind CSS, initialize shadcn/ui, configure CSS variables and theme in `index.css` | MVP | Not Started |
 | T-ARCH-003 | Docker Compose (Dev) | One-command local dev environment (API + DB + frontend) | MVP | Done |
 | T-ARCH-004 | Docker Compose (Production) | Production-ready compose with Traefik reverse proxy | P1 | Done |
 | T-ARCH-005 | Environment Configuration | 12-factor config via environment variables with validation | MVP | Not Started |

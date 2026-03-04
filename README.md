@@ -80,6 +80,7 @@ Custom field values are validated at the application layer using dynamically-gen
 | **API Docs** | OpenAPI (auto-generated) |
 | **Auth** | OAuth 2.0 / JWT |
 | **Frontend** | React 19 + Vite + TypeScript |
+| **UI Components** | shadcn/ui (Radix UI + Tailwind CSS) |
 | **State Management** | Zustand |
 | **HTTP Client** | Axios |
 | **Containerisation** | Docker & Docker Compose |
