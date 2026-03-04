@@ -40,7 +40,7 @@ export default function RecordForm({
   children,
 }: RecordFormProps) {
   return (
-    <form onSubmit={(e) => void onSubmit(e)} className="space-y-4">
+    <form onSubmit={(e) => { e.preventDefault(); void onSubmit(e) }} className="space-y-4">
       {fields.map((field) => (
         <div key={field.key} className="space-y-1.5">
           <Label htmlFor={field.key}>
