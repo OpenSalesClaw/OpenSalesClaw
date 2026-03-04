@@ -1,7 +1,9 @@
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
+
+from app.schemas.base import StandardReadFields
 
 
 class LeadCreate(BaseModel):
@@ -30,9 +32,7 @@ class LeadUpdate(BaseModel):
     custom_fields: dict[str, Any] | None = None
 
 
-class LeadRead(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
+class LeadRead(StandardReadFields):
     id: int
     first_name: str | None
     last_name: str
@@ -46,9 +46,3 @@ class LeadRead(BaseModel):
     converted_at: datetime | None
     converted_account_id: int | None
     converted_contact_id: int | None
-    custom_fields: dict[str, Any]
-    owner_id: int | None
-    created_by_id: int | None
-    updated_by_id: int | None
-    created_at: datetime
-    updated_at: datetime

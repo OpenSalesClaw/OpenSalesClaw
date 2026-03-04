@@ -1,8 +1,9 @@
-from datetime import datetime
 from decimal import Decimal
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
+
+from app.schemas.base import StandardReadFields
 
 
 class AccountCreate(BaseModel):
@@ -39,9 +40,7 @@ class AccountUpdate(BaseModel):
     custom_fields: dict[str, Any] | None = None
 
 
-class AccountRead(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
+class AccountRead(StandardReadFields):
     id: int
     name: str
     type: str | None
@@ -56,9 +55,3 @@ class AccountRead(BaseModel):
     description: str | None
     annual_revenue: Decimal | None
     number_of_employees: int | None
-    custom_fields: dict[str, Any]
-    owner_id: int | None
-    created_by_id: int | None
-    updated_by_id: int | None
-    created_at: datetime
-    updated_at: datetime

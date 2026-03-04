@@ -1,13 +1,14 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError
-from sqlalchemy import text
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.security import decode_access_token
+from app.models.user import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
@@ -15,8 +16,8 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
     db: Annotated[AsyncSession, Depends(get_db)],
-) -> dict[str, Any]:
-    """Decode the Bearer JWT and return the corresponding user row as a dict.
+) -> User:
+    """Decode the Bearer JWT and return the corresponding User model.
 
     Raises HTTP 401 if the token is invalid, expired, or the user does not exist.
     """
@@ -32,20 +33,19 @@ async def get_current_user(
         raise credentials_exception
 
     result = await db.execute(
-        text("SELECT * FROM users WHERE id = :id AND is_deleted = FALSE"),
-        {"id": user_id},
+        select(User).where(User.id == user_id, User.is_deleted.is_(False))
     )
-    row = result.mappings().first()
-    if row is None:
+    user = result.scalars().first()
+    if user is None:
         raise credentials_exception
-    return dict(row)
+    return user
 
 
 async def get_current_active_user(
-    current_user: Annotated[dict[str, Any], Depends(get_current_user)],
-) -> dict[str, Any]:
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> User:
     """Extend *get_current_user* by also asserting the account is active."""
-    if not current_user.get("is_active", True):
+    if not current_user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Inactive user account",

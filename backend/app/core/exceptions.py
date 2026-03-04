@@ -22,6 +22,11 @@ class NotFoundError(AppError):
     detail = "Resource not found."
 
 
+class AuthenticationError(AppError):
+    status_code = 401
+    detail = "Invalid credentials."
+
+
 class ForbiddenError(AppError):
     status_code = 403
     detail = "You do not have permission to perform this action."

@@ -7,23 +7,7 @@ and auth requirement.
 
 from httpx import AsyncClient
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-
-async def _create_account(client: AsyncClient, headers: dict[str, str], name: str = "Test Account") -> dict:
-    resp = await client.post("/api/accounts", json={"name": name}, headers=headers)
-    assert resp.status_code == 201
-    return resp.json()
-
-
-async def _create_contact(client: AsyncClient, headers: dict[str, str], **kwargs) -> dict:
-    payload = {"last_name": "Doe", **kwargs}
-    resp = await client.post("/api/contacts", json=payload, headers=headers)
-    assert resp.status_code == 201, resp.text
-    return resp.json()
-
+from tests.helpers import create_account, create_contact
 
 # ---------------------------------------------------------------------------
 # List
@@ -39,7 +23,7 @@ async def test_list_contacts_empty(client: AsyncClient, auth_headers: dict[str, 
 
 
 async def test_list_contacts_returns_created(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    await _create_contact(client, auth_headers, first_name="Jane", last_name="Smith")
+    await create_contact(client, auth_headers, first_name="Jane", last_name="Smith")
     resp = await client.get("/api/contacts", headers=auth_headers)
     data = resp.json()
     assert data["total"] == 1
@@ -48,7 +32,7 @@ async def test_list_contacts_returns_created(client: AsyncClient, auth_headers: 
 
 async def test_list_contacts_pagination(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     for i in range(4):
-        await _create_contact(client, auth_headers, last_name=f"Page{i}")
+        await create_contact(client, auth_headers, last_name=f"Page{i}")
     resp = await client.get("/api/contacts?limit=2&offset=0", headers=auth_headers)
     data = resp.json()
     assert len(data["items"]) == 2
@@ -56,8 +40,8 @@ async def test_list_contacts_pagination(client: AsyncClient, auth_headers: dict[
 
 
 async def test_list_contacts_filter_by_last_name(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    await _create_contact(client, auth_headers, last_name="Anderson")
-    await _create_contact(client, auth_headers, last_name="Bradley")
+    await create_contact(client, auth_headers, last_name="Anderson")
+    await create_contact(client, auth_headers, last_name="Bradley")
     resp = await client.get("/api/contacts?last_name=Ander", headers=auth_headers)
     data = resp.json()
     assert data["total"] == 1
@@ -65,8 +49,8 @@ async def test_list_contacts_filter_by_last_name(client: AsyncClient, auth_heade
 
 
 async def test_list_contacts_filter_by_email(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    await _create_contact(client, auth_headers, last_name="Mailer", email="mailer@corp.example.com")
-    await _create_contact(client, auth_headers, last_name="Other", email="other@example.com")
+    await create_contact(client, auth_headers, last_name="Mailer", email="mailer@corp.example.com")
+    await create_contact(client, auth_headers, last_name="Other", email="other@example.com")
     resp = await client.get("/api/contacts?email=mailer", headers=auth_headers)
     data = resp.json()
     assert data["total"] == 1
@@ -74,9 +58,9 @@ async def test_list_contacts_filter_by_email(client: AsyncClient, auth_headers: 
 
 
 async def test_list_contacts_filter_by_account_id(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    account = await _create_account(client, auth_headers, name="FilterCo")
-    await _create_contact(client, auth_headers, last_name="Linked", account_id=account["id"])
-    await _create_contact(client, auth_headers, last_name="Unlinked")
+    account = await create_account(client, auth_headers, name="FilterCo")
+    await create_contact(client, auth_headers, last_name="Linked", account_id=account["id"])
+    await create_contact(client, auth_headers, last_name="Unlinked")
     resp = await client.get(f"/api/contacts?account_id={account['id']}", headers=auth_headers)
     data = resp.json()
     assert data["total"] == 1
@@ -89,14 +73,14 @@ async def test_list_contacts_filter_by_account_id(client: AsyncClient, auth_head
 # ---------------------------------------------------------------------------
 
 
-async def test_create_contact_linked_to_account(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    account = await _create_account(client, auth_headers, name="Parent Corp")
-    contact = await _create_contact(client, auth_headers, last_name="Employee", account_id=account["id"])
+async def testcreate_contact_linked_to_account(client: AsyncClient, auth_headers: dict[str, str]) -> None:
+    account = await create_account(client, auth_headers, name="Parent Corp")
+    contact = await create_contact(client, auth_headers, last_name="Employee", account_id=account["id"])
     assert contact["account_id"] == account["id"]
 
 
-async def test_create_contact_without_account(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    contact = await _create_contact(client, auth_headers, last_name="Standalone")
+async def testcreate_contact_without_account(client: AsyncClient, auth_headers: dict[str, str]) -> None:
+    contact = await create_contact(client, auth_headers, last_name="Standalone")
     assert contact["account_id"] is None
 
 
@@ -105,7 +89,7 @@ async def test_create_contact_without_account(client: AsyncClient, auth_headers:
 # ---------------------------------------------------------------------------
 
 
-async def test_create_contact_full(client: AsyncClient, auth_headers: dict[str, str]) -> None:
+async def testcreate_contact_full(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     payload = {
         "first_name": "John",
         "last_name": "Full",
@@ -123,13 +107,13 @@ async def test_create_contact_full(client: AsyncClient, auth_headers: dict[str, 
     assert data["mailing_city"] == "Austin"
 
 
-async def test_create_contact_requires_last_name(client: AsyncClient, auth_headers: dict[str, str]) -> None:
+async def testcreate_contact_requires_last_name(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     resp = await client.post("/api/contacts", json={"first_name": "NoLast"}, headers=auth_headers)
     assert resp.status_code == 422
 
 
-async def test_create_contact_sets_created_by(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    contact = await _create_contact(client, auth_headers, last_name="Audited")
+async def testcreate_contact_sets_created_by(client: AsyncClient, auth_headers: dict[str, str]) -> None:
+    contact = await create_contact(client, auth_headers, last_name="Audited")
     assert contact["created_by_id"] is not None
 
 
@@ -139,7 +123,7 @@ async def test_create_contact_sets_created_by(client: AsyncClient, auth_headers:
 
 
 async def test_get_contact_by_id(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    contact = await _create_contact(client, auth_headers, last_name="Fetch")
+    contact = await create_contact(client, auth_headers, last_name="Fetch")
     resp = await client.get(f"/api/contacts/{contact['id']}", headers=auth_headers)
     assert resp.status_code == 200
     assert resp.json()["id"] == contact["id"]
@@ -156,14 +140,14 @@ async def test_get_contact_not_found(client: AsyncClient, auth_headers: dict[str
 
 
 async def test_update_contact(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    contact = await _create_contact(client, auth_headers, last_name="Before")
+    contact = await create_contact(client, auth_headers, last_name="Before")
     resp = await client.patch(f"/api/contacts/{contact['id']}", json={"last_name": "After"}, headers=auth_headers)
     assert resp.status_code == 200
     assert resp.json()["last_name"] == "After"
 
 
 async def test_update_contact_partial_preserves_fields(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    contact = await _create_contact(client, auth_headers, last_name="Preserve", email="keep@example.com")
+    contact = await create_contact(client, auth_headers, last_name="Preserve", email="keep@example.com")
     resp = await client.patch(f"/api/contacts/{contact['id']}", json={"title": "Manager"}, headers=auth_headers)
     data = resp.json()
     assert data["email"] == "keep@example.com"  # unchanged
@@ -181,20 +165,20 @@ async def test_update_contact_not_found(client: AsyncClient, auth_headers: dict[
 
 
 async def test_soft_delete_contact(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    contact = await _create_contact(client, auth_headers, last_name="Deleted")
+    contact = await create_contact(client, auth_headers, last_name="Deleted")
     resp = await client.delete(f"/api/contacts/{contact['id']}", headers=auth_headers)
     assert resp.status_code == 204
 
 
 async def test_deleted_contact_returns_404(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    contact = await _create_contact(client, auth_headers, last_name="Gone")
+    contact = await create_contact(client, auth_headers, last_name="Gone")
     await client.delete(f"/api/contacts/{contact['id']}", headers=auth_headers)
     resp = await client.get(f"/api/contacts/{contact['id']}", headers=auth_headers)
     assert resp.status_code == 404
 
 
 async def test_deleted_contact_excluded_from_list(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    contact = await _create_contact(client, auth_headers, last_name="RemoveMe")
+    contact = await create_contact(client, auth_headers, last_name="RemoveMe")
     await client.delete(f"/api/contacts/{contact['id']}", headers=auth_headers)
     resp = await client.get("/api/contacts", headers=auth_headers)
     ids = [item["id"] for item in resp.json()["items"]]

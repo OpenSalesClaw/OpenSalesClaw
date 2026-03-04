@@ -6,8 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.dependencies import get_current_active_user
-from app.core.exceptions import NotFoundError
 from app.core.security import create_access_token
+from app.models.user import User
 from app.schemas.user import UserCreate, UserRead
 from app.services import user as user_service
 
@@ -30,25 +30,14 @@ async def login(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> dict[str, Any]:
     """Authenticate with email + password and return an access token."""
-    try:
-        user = await user_service.authenticate_user(db, form_data.username, form_data.password)
-    except NotFoundError:
-        from fastapi import HTTPException
-
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    user = await user_service.authenticate_user(db, form_data.username, form_data.password)
     token = create_access_token(subject=str(user.id))
     return {"access_token": token, "token_type": "bearer"}
 
 
 @router.get("/me", response_model=UserRead)
 async def me(
-    current_user: Annotated[dict[str, Any], Depends(get_current_active_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
 ) -> UserRead:
     """Return the authenticated user's profile."""
-    user = await user_service.get_user_by_id(db, current_user["id"])
-    return user  # type: ignore[return-value]
+    return current_user  # type: ignore[return-value]

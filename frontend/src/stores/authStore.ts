@@ -38,7 +38,6 @@ export const useAuthStore = create<AuthState>()(
           { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } },
         )
 
-        localStorage.setItem('access_token', data.access_token)
         set({ token: data.access_token, isAuthenticated: true })
 
         // Fetch and store the authenticated user's profile
@@ -46,7 +45,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: () => {
-        localStorage.removeItem('access_token')
+        localStorage.removeItem('auth-storage')
         set({ token: null, user: null, isAuthenticated: false })
       },
 
@@ -58,11 +57,6 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-storage',
       partialize: (state) => ({ token: state.token, user: state.user, isAuthenticated: state.isAuthenticated }),
-      onRehydrateStorage: () => (state) => {
-        if (state?.token) {
-          localStorage.setItem('access_token', state.token)
-        }
-      },
     },
   ),
 )

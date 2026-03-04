@@ -6,17 +6,7 @@ create, get by ID, update, soft delete, and auth requirement.
 
 from httpx import AsyncClient
 
-# ---------------------------------------------------------------------------
-# Helper
-# ---------------------------------------------------------------------------
-
-
-async def _create_lead(client: AsyncClient, headers: dict[str, str], **kwargs) -> dict:
-    payload = {"last_name": "Lead", "company": "LeadCo", **kwargs}
-    resp = await client.post("/api/leads", json=payload, headers=headers)
-    assert resp.status_code == 201, resp.text
-    return resp.json()
-
+from tests.helpers import create_lead
 
 # ---------------------------------------------------------------------------
 # List
@@ -32,7 +22,7 @@ async def test_list_leads_empty(client: AsyncClient, auth_headers: dict[str, str
 
 
 async def test_list_leads_returns_created(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    await _create_lead(client, auth_headers, last_name="Johnson", company="JohnsonInc")
+    await create_lead(client, auth_headers, last_name="Johnson", company="JohnsonInc")
     resp = await client.get("/api/leads", headers=auth_headers)
     data = resp.json()
     assert data["total"] == 1
@@ -41,7 +31,7 @@ async def test_list_leads_returns_created(client: AsyncClient, auth_headers: dic
 
 async def test_list_leads_pagination(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     for i in range(5):
-        await _create_lead(client, auth_headers, last_name=f"Lead{i}", company=f"Co{i}")
+        await create_lead(client, auth_headers, last_name=f"Lead{i}", company=f"Co{i}")
     resp = await client.get("/api/leads?limit=3&offset=0", headers=auth_headers)
     data = resp.json()
     assert len(data["items"]) == 3
@@ -49,8 +39,8 @@ async def test_list_leads_pagination(client: AsyncClient, auth_headers: dict[str
 
 
 async def test_list_leads_filter_by_status(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    await _create_lead(client, auth_headers, last_name="NewLead", company="NewCo", status="New")
-    await _create_lead(client, auth_headers, last_name="ContactedLead", company="ContactedCo", status="Contacted")
+    await create_lead(client, auth_headers, last_name="NewLead", company="NewCo", status="New")
+    await create_lead(client, auth_headers, last_name="ContactedLead", company="ContactedCo", status="Contacted")
     resp = await client.get("/api/leads?status=New", headers=auth_headers)
     data = resp.json()
     assert data["total"] == 1
@@ -58,8 +48,8 @@ async def test_list_leads_filter_by_status(client: AsyncClient, auth_headers: di
 
 
 async def test_list_leads_filter_by_company(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    await _create_lead(client, auth_headers, last_name="A", company="UniqueWidgets")
-    await _create_lead(client, auth_headers, last_name="B", company="OtherInc")
+    await create_lead(client, auth_headers, last_name="A", company="UniqueWidgets")
+    await create_lead(client, auth_headers, last_name="B", company="OtherInc")
     resp = await client.get("/api/leads?company=UniqueW", headers=auth_headers)
     data = resp.json()
     assert data["total"] == 1
@@ -67,8 +57,8 @@ async def test_list_leads_filter_by_company(client: AsyncClient, auth_headers: d
 
 
 async def test_list_leads_filter_by_email(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    await _create_lead(client, auth_headers, last_name="Emailer", company="Co", email="special@leads.example.com")
-    await _create_lead(client, auth_headers, last_name="Other", company="Co2", email="other@example.com")
+    await create_lead(client, auth_headers, last_name="Emailer", company="Co", email="special@leads.example.com")
+    await create_lead(client, auth_headers, last_name="Other", company="Co2", email="other@example.com")
     resp = await client.get("/api/leads?email=special", headers=auth_headers)
     data = resp.json()
     assert data["total"] == 1
@@ -80,7 +70,7 @@ async def test_list_leads_filter_by_email(client: AsyncClient, auth_headers: dic
 # ---------------------------------------------------------------------------
 
 
-async def test_create_lead_minimal(client: AsyncClient, auth_headers: dict[str, str]) -> None:
+async def testcreate_lead_minimal(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     resp = await client.post(
         "/api/leads",
         json={"last_name": "Minimal", "company": "MinimalCo"},
@@ -93,7 +83,7 @@ async def test_create_lead_minimal(client: AsyncClient, auth_headers: dict[str, 
     assert data["company"] == "MinimalCo"
 
 
-async def test_create_lead_with_all_fields(client: AsyncClient, auth_headers: dict[str, str]) -> None:
+async def testcreate_lead_with_all_fields(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     payload = {
         "first_name": "Full",
         "last_name": "Lead",
@@ -113,18 +103,18 @@ async def test_create_lead_with_all_fields(client: AsyncClient, auth_headers: di
     assert data["industry"] == "Finance"
 
 
-async def test_create_lead_requires_last_name(client: AsyncClient, auth_headers: dict[str, str]) -> None:
+async def testcreate_lead_requires_last_name(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     resp = await client.post("/api/leads", json={"company": "NoCo"}, headers=auth_headers)
     assert resp.status_code == 422
 
 
-async def test_create_lead_requires_company(client: AsyncClient, auth_headers: dict[str, str]) -> None:
+async def testcreate_lead_requires_company(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     resp = await client.post("/api/leads", json={"last_name": "NoCompany"}, headers=auth_headers)
     assert resp.status_code == 422
 
 
-async def test_create_lead_sets_created_by(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    lead = await _create_lead(client, auth_headers)
+async def testcreate_lead_sets_created_by(client: AsyncClient, auth_headers: dict[str, str]) -> None:
+    lead = await create_lead(client, auth_headers)
     assert lead["created_by_id"] is not None
 
 
@@ -134,7 +124,7 @@ async def test_create_lead_sets_created_by(client: AsyncClient, auth_headers: di
 
 
 async def test_get_lead_by_id(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    lead = await _create_lead(client, auth_headers, last_name="Fetch", company="FetchCo")
+    lead = await create_lead(client, auth_headers, last_name="Fetch", company="FetchCo")
     resp = await client.get(f"/api/leads/{lead['id']}", headers=auth_headers)
     assert resp.status_code == 200
     assert resp.json()["id"] == lead["id"]
@@ -152,14 +142,14 @@ async def test_get_lead_not_found(client: AsyncClient, auth_headers: dict[str, s
 
 
 async def test_update_lead_status(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    lead = await _create_lead(client, auth_headers, status="New")
+    lead = await create_lead(client, auth_headers, status="New")
     resp = await client.patch(f"/api/leads/{lead['id']}", json={"status": "Qualified"}, headers=auth_headers)
     assert resp.status_code == 200
     assert resp.json()["status"] == "Qualified"
 
 
 async def test_update_lead_partial_preserves_fields(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    lead = await _create_lead(client, auth_headers, last_name="Preserve", company="KeepMe", status="New")
+    lead = await create_lead(client, auth_headers, last_name="Preserve", company="KeepMe", status="New")
     resp = await client.patch(f"/api/leads/{lead['id']}", json={"industry": "Retail"}, headers=auth_headers)
     data = resp.json()
     assert data["company"] == "KeepMe"
@@ -178,20 +168,20 @@ async def test_update_lead_not_found(client: AsyncClient, auth_headers: dict[str
 
 
 async def test_soft_delete_lead(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    lead = await _create_lead(client, auth_headers)
+    lead = await create_lead(client, auth_headers)
     resp = await client.delete(f"/api/leads/{lead['id']}", headers=auth_headers)
     assert resp.status_code == 204
 
 
 async def test_deleted_lead_returns_404(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    lead = await _create_lead(client, auth_headers)
+    lead = await create_lead(client, auth_headers)
     await client.delete(f"/api/leads/{lead['id']}", headers=auth_headers)
     resp = await client.get(f"/api/leads/{lead['id']}", headers=auth_headers)
     assert resp.status_code == 404
 
 
 async def test_deleted_lead_excluded_from_list(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    lead = await _create_lead(client, auth_headers)
+    lead = await create_lead(client, auth_headers)
     await client.delete(f"/api/leads/{lead['id']}", headers=auth_headers)
     resp = await client.get("/api/leads", headers=auth_headers)
     ids = [item["id"] for item in resp.json()["items"]]

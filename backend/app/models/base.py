@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import BigInteger, Boolean, ForeignKey, MetaData, Text
+from sqlalchemy import BigInteger, Boolean, ForeignKey, Identity, MetaData, String
 from sqlalchemy.dialects.postgresql import JSONB, TIMESTAMP
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.sql import func
@@ -9,7 +9,7 @@ from sqlalchemy.sql import func
 # Naming convention ensures SQLAlchemy can emit DROP CONSTRAINT by name for
 # use_alter FK constraints and any other named constraints.
 _NAMING_CONVENTION: dict[str, str] = {
-    "ix": "ix_%(column_0_label)s",
+    "ix": "idx_%(table_name)s_%(column_0_label)s",
     "uq": "uq_%(table_name)s_%(column_0_name)s",
     "ck": "ck_%(table_name)s_%(constraint_name)s",
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
@@ -24,7 +24,7 @@ class Base(DeclarativeBase):
 class StandardColumns:
     """Mixin that adds all standard audit/metadata columns required by every entity table."""
 
-    sfid: Mapped[str | None] = mapped_column(Text, nullable=True)
+    sfid: Mapped[str | None] = mapped_column(String(40), nullable=True)
 
     custom_fields: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict, server_default="{}")
 

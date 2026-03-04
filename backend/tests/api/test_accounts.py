@@ -6,17 +6,7 @@ soft delete, 404 on deleted/missing, and auth requirement.
 
 from httpx import AsyncClient
 
-# ---------------------------------------------------------------------------
-# Helper
-# ---------------------------------------------------------------------------
-
-
-async def _create_account(client: AsyncClient, headers: dict[str, str], **kwargs) -> dict:
-    payload = {"name": "Test Account", **kwargs}
-    resp = await client.post("/api/accounts", json=payload, headers=headers)
-    assert resp.status_code == 201, resp.text
-    return resp.json()
-
+from tests.helpers import create_account
 
 # ---------------------------------------------------------------------------
 # List
@@ -34,7 +24,7 @@ async def test_list_accounts_empty(client: AsyncClient, auth_headers: dict[str, 
 
 
 async def test_list_accounts_returns_created(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    await _create_account(client, auth_headers, name="Acme Corp")
+    await create_account(client, auth_headers, name="Acme Corp")
     resp = await client.get("/api/accounts", headers=auth_headers)
     assert resp.status_code == 200
     data = resp.json()
@@ -44,7 +34,7 @@ async def test_list_accounts_returns_created(client: AsyncClient, auth_headers: 
 
 async def test_list_accounts_pagination(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     for i in range(5):
-        await _create_account(client, auth_headers, name=f"Paged Account {i}")
+        await create_account(client, auth_headers, name=f"Paged Account {i}")
     resp = await client.get("/api/accounts?limit=2&offset=0", headers=auth_headers)
     assert resp.status_code == 200
     data = resp.json()
@@ -55,8 +45,8 @@ async def test_list_accounts_pagination(client: AsyncClient, auth_headers: dict[
 
 
 async def test_list_accounts_filter_by_name(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    await _create_account(client, auth_headers, name="Globocorp")
-    await _create_account(client, auth_headers, name="TechStart")
+    await create_account(client, auth_headers, name="Globocorp")
+    await create_account(client, auth_headers, name="TechStart")
     resp = await client.get("/api/accounts?name=Globo", headers=auth_headers)
     assert resp.status_code == 200
     data = resp.json()
@@ -65,8 +55,8 @@ async def test_list_accounts_filter_by_name(client: AsyncClient, auth_headers: d
 
 
 async def test_list_accounts_filter_by_type(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    await _create_account(client, auth_headers, name="CustomerCo", type="Customer")
-    await _create_account(client, auth_headers, name="PartnerCo", type="Partner")
+    await create_account(client, auth_headers, name="CustomerCo", type="Customer")
+    await create_account(client, auth_headers, name="PartnerCo", type="Partner")
     resp = await client.get("/api/accounts?type=Customer", headers=auth_headers)
     assert resp.status_code == 200
     data = resp.json()
@@ -78,7 +68,7 @@ async def test_list_accounts_filter_by_type(client: AsyncClient, auth_headers: d
 # ---------------------------------------------------------------------------
 
 
-async def test_create_account_minimal(client: AsyncClient, auth_headers: dict[str, str]) -> None:
+async def testcreate_account_minimal(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     resp = await client.post("/api/accounts", json={"name": "Minimal Corp"}, headers=auth_headers)
     assert resp.status_code == 201
     data = resp.json()
@@ -87,7 +77,7 @@ async def test_create_account_minimal(client: AsyncClient, auth_headers: dict[st
     assert data["type"] is None
 
 
-async def test_create_account_full(client: AsyncClient, auth_headers: dict[str, str]) -> None:
+async def testcreate_account_full(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     payload = {
         "name": "Full Corp",
         "type": "Customer",
@@ -108,12 +98,12 @@ async def test_create_account_full(client: AsyncClient, auth_headers: dict[str, 
     assert data["number_of_employees"] == 50
 
 
-async def test_create_account_requires_name(client: AsyncClient, auth_headers: dict[str, str]) -> None:
+async def testcreate_account_requires_name(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     resp = await client.post("/api/accounts", json={"type": "Customer"}, headers=auth_headers)
     assert resp.status_code == 422
 
 
-async def test_create_account_sets_created_by(client: AsyncClient, auth_headers: dict[str, str]) -> None:
+async def testcreate_account_sets_created_by(client: AsyncClient, auth_headers: dict[str, str]) -> None:
     resp = await client.post("/api/accounts", json={"name": "Audit Corp"}, headers=auth_headers)
     assert resp.status_code == 201
     data = resp.json()
@@ -126,7 +116,7 @@ async def test_create_account_sets_created_by(client: AsyncClient, auth_headers:
 
 
 async def test_get_account_by_id(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    account = await _create_account(client, auth_headers, name="Fetch Me")
+    account = await create_account(client, auth_headers, name="Fetch Me")
     resp = await client.get(f"/api/accounts/{account['id']}", headers=auth_headers)
     assert resp.status_code == 200
     assert resp.json()["id"] == account["id"]
@@ -144,14 +134,14 @@ async def test_get_account_not_found(client: AsyncClient, auth_headers: dict[str
 
 
 async def test_update_account_name(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    account = await _create_account(client, auth_headers, name="Old Name")
+    account = await create_account(client, auth_headers, name="Old Name")
     resp = await client.patch(f"/api/accounts/{account['id']}", json={"name": "New Name"}, headers=auth_headers)
     assert resp.status_code == 200
     assert resp.json()["name"] == "New Name"
 
 
 async def test_update_account_partial(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    account = await _create_account(client, auth_headers, name="Partial Update", type="Customer")
+    account = await create_account(client, auth_headers, name="Partial Update", type="Customer")
     resp = await client.patch(f"/api/accounts/{account['id']}", json={"industry": "Finance"}, headers=auth_headers)
     assert resp.status_code == 200
     data = resp.json()
@@ -171,20 +161,20 @@ async def test_update_account_not_found(client: AsyncClient, auth_headers: dict[
 
 
 async def test_soft_delete_account(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    account = await _create_account(client, auth_headers, name="Delete Me")
+    account = await create_account(client, auth_headers, name="Delete Me")
     del_resp = await client.delete(f"/api/accounts/{account['id']}", headers=auth_headers)
     assert del_resp.status_code == 204
 
 
 async def test_deleted_account_returns_404(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    account = await _create_account(client, auth_headers, name="Gone Soon")
+    account = await create_account(client, auth_headers, name="Gone Soon")
     await client.delete(f"/api/accounts/{account['id']}", headers=auth_headers)
     resp = await client.get(f"/api/accounts/{account['id']}", headers=auth_headers)
     assert resp.status_code == 404
 
 
 async def test_deleted_account_excluded_from_list(client: AsyncClient, auth_headers: dict[str, str]) -> None:
-    account = await _create_account(client, auth_headers, name="Will Be Deleted")
+    account = await create_account(client, auth_headers, name="Will Be Deleted")
     await client.delete(f"/api/accounts/{account['id']}", headers=auth_headers)
     resp = await client.get("/api/accounts", headers=auth_headers)
     ids = [item["id"] for item in resp.json()["items"]]

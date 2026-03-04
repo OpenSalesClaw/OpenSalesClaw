@@ -45,12 +45,12 @@
 
 | ID | Feature | Description | Priority | Status |
 |----|---------|-------------|----------|--------|
-| F-CORE-001 | Accounts CRUD | Create, read, update, soft-delete company/organization records | MVP | Not Started |
-| F-CORE-002 | Contacts CRUD | Manage individual people linked to accounts | MVP | Not Started |
-| F-CORE-003 | Leads CRUD | Track unqualified prospects before conversion | MVP | Not Started |
+| F-CORE-001 | Accounts CRUD | Create, read, update, soft-delete company/organization records | MVP | Done |
+| F-CORE-002 | Contacts CRUD | Manage individual people linked to accounts | MVP | Done |
+| F-CORE-003 | Leads CRUD | Track unqualified prospects before conversion | MVP | Done |
 | F-CORE-004 | Opportunities CRUD | Manage potential deals/sales with stage tracking | MVP | Not Started |
 | F-CORE-005 | Cases CRUD | Customer support tickets/issues | MVP | Not Started |
-| F-CORE-006 | Users CRUD | System user management (name, email, role, profile) | MVP | Not Started |
+| F-CORE-006 | Users CRUD | System user management (name, email, role, profile) | MVP | In Progress |
 | F-CORE-007 | Roles & Role Hierarchy | Define organizational roles with parent-child hierarchy | MVP | Not Started |
 | F-CORE-008 | Record Types | Sub-classify records within an object (e.g., "Partner Account") | P1 | Not Started |
 | F-CORE-009 | Account Hierarchy | Parent-child relationships between accounts | P1 | Not Started |
@@ -232,7 +232,7 @@
 | ID | Feature | Description | Priority | Status |
 |----|---------|-------------|----------|--------|
 | F-SEC-001 | User Authentication (OAuth 2.0) | Login via OAuth 2.0 / OpenID Connect | MVP | Not Started |
-| F-SEC-002 | Username/Password Login | Local credential authentication with bcrypt hashing | MVP | Not Started |
+| F-SEC-002 | Username/Password Login | Local credential authentication with bcrypt hashing | MVP | Done |
 | F-SEC-003 | Multi-Factor Authentication (MFA) | TOTP-based second factor | P1 | Not Started |
 | F-SEC-004 | SSO (SAML / OIDC) | Single sign-on with external IdPs (Okta, Azure AD, Google) | P2 | Not Started |
 | F-SEC-005 | Profiles | Define base-level object & field permissions per profile | P1 | Not Started |
@@ -317,7 +317,7 @@
 
 | ID | Feature | Description | Priority | Status |
 |----|---------|-------------|----------|--------|
-| F-INT-001 | RESTful CRUD API | Full CRUD endpoints for every object with filtering, sorting, pagination | MVP | Not Started |
+| F-INT-001 | RESTful CRUD API | Full CRUD endpoints for every object with filtering, sorting, pagination | MVP | In Progress |
 | F-INT-002 | OpenAPI / Swagger Docs | Auto-generated interactive API documentation | MVP | Not Started |
 | F-INT-003 | API Versioning | Version the API (URL or header-based) for backward compatibility | P1 | Not Started |
 | F-INT-004 | Webhooks (Outbound) | Configurable HTTP callbacks on record events (create, update, delete) | P1 | Not Started |
@@ -388,8 +388,8 @@
 |----|---------|-------------|----------|--------|
 | T-ARCH-001 | FastAPI Application Scaffold | Project structure with routers, models, schemas, services | MVP | Not Started |
 | T-ARCH-002 | React + Vite Scaffold | Frontend project with TypeScript, routing, and API client | MVP | Not Started |
-| T-ARCH-003 | Docker Compose (Dev) | One-command local dev environment (API + DB + frontend) | MVP | Not Started |
-| T-ARCH-004 | Docker Compose (Production) | Production-ready compose with Traefik reverse proxy | P1 | Not Started |
+| T-ARCH-003 | Docker Compose (Dev) | One-command local dev environment (API + DB + frontend) | MVP | Done |
+| T-ARCH-004 | Docker Compose (Production) | Production-ready compose with Traefik reverse proxy | P1 | Done |
 | T-ARCH-005 | Environment Configuration | 12-factor config via environment variables with validation | MVP | Not Started |
 | T-ARCH-006 | Background Job Queue | Async task processing (Celery, ARQ, or Dramatiq + Redis) | P1 | Not Started |
 | T-ARCH-007 | Event System (Internal) | Pub/sub for decoupled domain events within the backend | P2 | Not Started |
@@ -409,7 +409,7 @@
 | ID | Feature | Description | Priority | Status |
 |----|---------|-------------|----------|--------|
 | T-DB-001 | PostgreSQL Schema Design | Full schema for all core objects with conventions from copilot-instructions | MVP | Not Started |
-| T-DB-002 | Alembic Migration Setup | Migration framework with auto-generation and version tracking | MVP | Not Started |
+| T-DB-002 | Alembic Migration Setup | Migration framework with auto-generation and version tracking | MVP | Done |
 | T-DB-003 | BaseModel Mixin | Shared SQLAlchemy mixin for id, sfid, audit cols, soft-delete, custom_fields | MVP | Not Started |
 | T-DB-004 | JSONB Custom Fields with GIN Index | Custom field storage with performant querying | MVP | Not Started |
 | T-DB-005 | Full-Text Search (tsvector) | PostgreSQL full-text search across key fields | P1 | Not Started |
@@ -448,13 +448,13 @@
 
 | ID | Feature | Description | Priority | Status |
 |----|---------|-------------|----------|--------|
-| T-OPS-001 | Dockerfile (Backend) | Multi-stage Docker build for the FastAPI app | MVP | Not Started |
-| T-OPS-002 | Dockerfile (Frontend) | Multi-stage build: Vite build → Nginx serving | MVP | Not Started |
+| T-OPS-001 | Dockerfile (Backend) | Multi-stage Docker build for the FastAPI app | MVP | Done |
+| T-OPS-002 | Dockerfile (Frontend) | Multi-stage build: Vite build → Nginx serving | MVP | Done |
 | T-OPS-003 | CI Pipeline (GitHub Actions) | Lint, type-check, test, build on every PR | P1 | Not Started |
 | T-OPS-004 | CD Pipeline (GitHub Actions) | Auto-deploy to staging on merge; manual promote to prod | P2 | Not Started |
 | T-OPS-005 | Traefik Reverse Proxy | TLS termination, routing, automatic Let's Encrypt certs | P1 | Not Started |
 | T-OPS-006 | Helm Chart / K8s Manifests | Kubernetes deployment option | P3 | Not Started |
-| T-OPS-007 | Automated Database Migrations | Run Alembic migrations on deploy (init container or entrypoint) | P1 | Not Started |
+| T-OPS-007 | Automated Database Migrations | Run Alembic migrations on deploy (init container or entrypoint) | P1 | Done |
 | T-OPS-008 | Blue/Green or Rolling Deploys | Zero-downtime deployment strategy | P3 | Not Started |
 | T-OPS-009 | Automatic TLS Certificates | Let's Encrypt integration via Traefik or Caddy | P1 | Not Started |
 | T-OPS-010 | Docker Image Registry | Publish images to GHCR or Docker Hub | P2 | Not Started |
@@ -487,7 +487,7 @@
 | ID | Feature | Description | Priority | Status |
 |----|---------|-------------|----------|--------|
 | T-PERF-001 | Async Database Sessions | Non-blocking DB access via SQLAlchemy async engine | MVP | Not Started |
-| T-PERF-002 | Pagination (Offset/Limit) | All list endpoints paginated with configurable limits | MVP | Not Started |
+| T-PERF-002 | Pagination (Offset/Limit) | All list endpoints paginated with configurable limits | MVP | Done |
 | T-PERF-003 | Cursor-Based Pagination | Keyset pagination for large datasets and infinite scroll | P2 | Not Started |
 | T-PERF-004 | Selective Field Retrieval | `?fields=id,name,email` parameter to reduce payload size | P2 | Not Started |
 | T-PERF-005 | Response Compression (gzip/br) | Compress API responses for reduced bandwidth | P1 | Not Started |
@@ -522,7 +522,7 @@
 
 | ID | Feature | Description | Priority | Status |
 |----|---------|-------------|----------|--------|
-| T-TEST-001 | Unit Tests (Backend) | pytest tests for services, models, and utility functions | MVP | Not Started |
+| T-TEST-001 | Unit Tests (Backend) | pytest tests for services, models, and utility functions | MVP | Done |
 | T-TEST-002 | API Integration Tests | Test all CRUD endpoints with real DB (test transactions) | MVP | Not Started |
 | T-TEST-003 | Test Fixtures & Factories | factory_boy factories for all entities | P1 | Not Started |
 | T-TEST-004 | Frontend Unit Tests | Vitest/Jest tests for components and hooks | P1 | Not Started |

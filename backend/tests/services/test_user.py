@@ -8,7 +8,7 @@ independently of the HTTP layer.  Each test is rolled back automatically by the
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import ConflictError, NotFoundError
+from app.core.exceptions import AuthenticationError, ConflictError, NotFoundError
 from app.schemas.user import UserCreate, UserUpdate
 from app.services import user as user_service
 
@@ -114,12 +114,12 @@ async def test_authenticate_user_success(db: AsyncSession) -> None:
 
 async def test_authenticate_user_wrong_password(db: AsyncSession) -> None:
     await _make_user(db)
-    with pytest.raises(NotFoundError):
+    with pytest.raises(AuthenticationError):
         await user_service.authenticate_user(db, _USER_EMAIL, "wrongpassword")
 
 
 async def test_authenticate_user_unknown_email(db: AsyncSession) -> None:
-    with pytest.raises(NotFoundError):
+    with pytest.raises(AuthenticationError):
         await user_service.authenticate_user(db, "unknown@example.com", "whatever")
 
 
@@ -128,7 +128,7 @@ async def test_authenticate_user_inactive_account(db: AsyncSession) -> None:
     # Deactivate the user directly
     user.is_active = False
     await db.flush()
-    with pytest.raises(NotFoundError):
+    with pytest.raises(AuthenticationError):
         await user_service.authenticate_user(db, _USER_EMAIL, _USER_PASSWORD)
 
 

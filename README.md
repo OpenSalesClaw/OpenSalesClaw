@@ -207,8 +207,6 @@ Store value   →  Merged into record's JSONB column (contacts.custom_fields)
 Query value   →  PostgreSQL JSONB operators + GIN index
 ```
 
-For a deep dive, see [design/custom-tables-fields-architecture.md](design/custom-tables-fields-architecture.md).
-
 ---
 
 ## Project Structure
@@ -248,16 +246,16 @@ For a deep dive, see [design/custom-tables-fields-architecture.md](design/custom
 
 OpenSalesClaw is in **early development**. Here's what's planned:
 
-- [x] Core database schema (Accounts, Contacts, Leads, Opportunities, Cases, Users, Roles, RecordTypes)
-- [x] Custom objects & custom fields architecture (JSONB + metadata tables)
-- [x] Picklist management
-- [x] Multi-currency support
+- [x] Core database schema (Accounts, Contacts, Leads, Users, CustomFieldDefinitions)
+- [x] Custom fields architecture (JSONB + metadata table)
 - [x] Alembic migration setup
 - [x] FastAPI REST endpoints — Accounts, Contacts, Leads
 - [x] OAuth 2.0 authentication & JWT-based authorization
-- [x] React frontend — Dashboard, Login, Accounts, Contacts, Leads list views
+- [x] React frontend — Dashboard, Login, Accounts list view
 - [x] Docker Compose production setup with Traefik
 - [x] pytest test suite (API routes & service layer)
+- [ ] Picklist management API
+- [ ] Custom field validation against definitions
 - [ ] FastAPI REST endpoints — Opportunities, Cases, Users, Roles
 - [ ] Sales objects (Products, Pricebooks, Quotes, Orders, Contracts)
 - [ ] Marketing objects (Campaigns, Campaign Members, Email Templates)

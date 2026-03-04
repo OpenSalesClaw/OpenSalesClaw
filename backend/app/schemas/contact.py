@@ -1,7 +1,8 @@
-from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
+
+from app.schemas.base import StandardReadFields
 
 
 class ContactCreate(BaseModel):
@@ -38,9 +39,7 @@ class ContactUpdate(BaseModel):
     custom_fields: dict[str, Any] | None = None
 
 
-class ContactRead(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
+class ContactRead(StandardReadFields):
     id: int
     first_name: str | None
     last_name: str
@@ -55,9 +54,3 @@ class ContactRead(BaseModel):
     mailing_state: str | None
     mailing_postal_code: str | None
     mailing_country: str | None
-    custom_fields: dict[str, Any]
-    owner_id: int | None
-    created_by_id: int | None
-    updated_by_id: int | None
-    created_at: datetime
-    updated_at: datetime

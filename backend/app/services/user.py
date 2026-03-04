@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import ConflictError, NotFoundError
+from app.core.exceptions import AuthenticationError, ConflictError, NotFoundError
 from app.core.security import hash_password, verify_password
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
@@ -42,9 +42,9 @@ async def create_user(db: AsyncSession, data: UserCreate, created_by_id: int | N
 async def authenticate_user(db: AsyncSession, email: str, password: str) -> User:
     user = await get_user_by_email(db, email)
     if user is None or not verify_password(password, user.hashed_password):
-        raise NotFoundError("Invalid email or password.")
+        raise AuthenticationError("Invalid email or password.")
     if not user.is_active:
-        raise NotFoundError("User account is inactive.")
+        raise AuthenticationError("User account is inactive.")
     return user
 
 

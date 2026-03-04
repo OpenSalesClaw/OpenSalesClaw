@@ -1,6 +1,6 @@
-from datetime import datetime
+from pydantic import BaseModel, EmailStr
 
-from pydantic import BaseModel, ConfigDict, EmailStr
+from app.schemas.base import StandardReadFields
 
 
 class UserCreate(BaseModel):
@@ -18,14 +18,10 @@ class UserUpdate(BaseModel):
     is_active: bool | None = None
 
 
-class UserRead(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
+class UserRead(StandardReadFields):
     id: int
     email: str
     first_name: str | None
     last_name: str | None
     is_active: bool
     is_superuser: bool
-    created_at: datetime
-    updated_at: datetime

@@ -1,6 +1,6 @@
 from typing import Any
 
-from sqlalchemy import Boolean, Integer, String, Text, UniqueConstraint
+from sqlalchemy import BigInteger, Boolean, Identity, Integer, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -11,7 +11,7 @@ class CustomFieldDefinition(StandardColumns, Base):
     __tablename__ = "custom_field_definitions"
     __table_args__ = (UniqueConstraint("object_name", "field_name", name="uq_custom_field_definitions_object_field"),)
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, Identity(always=True), primary_key=True)
     # e.g. 'accounts', 'contacts'
     object_name: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     field_name: Mapped[str] = mapped_column(String(100), nullable=False)

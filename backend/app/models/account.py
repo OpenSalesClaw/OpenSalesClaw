@@ -1,7 +1,7 @@
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
-from sqlalchemy import BigInteger, Integer, Numeric, String, Text
+from sqlalchemy import BigInteger, Identity, Integer, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, StandardColumns
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 class Account(StandardColumns, Base):
     __tablename__ = "accounts"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    id: Mapped[int] = mapped_column(BigInteger, Identity(always=True), primary_key=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     # Picklist: Customer, Partner, Prospect, Vendor, Other
     type: Mapped[str | None] = mapped_column(String(50), nullable=True)
@@ -35,7 +35,7 @@ class Account(StandardColumns, Base):
     contacts: Mapped[list["Contact"]] = relationship(  # noqa: F821
         "Contact",
         back_populates="account",
-        primaryjoin="and_(Contact.account_id == Account.id, Contact.is_deleted == False)",
+        primaryjoin="and_(Contact.account_id == Account.id, Contact.is_deleted == false())",
         lazy="noload",
         viewonly=True,
     )
