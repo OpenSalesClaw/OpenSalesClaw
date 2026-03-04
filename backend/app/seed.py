@@ -26,6 +26,7 @@ from app.models.lead import Lead
 from app.models.opportunity import Opportunity
 from app.models.role import Role
 from app.models.user import User
+from app.services.case import _generate_case_number
 
 logger = logging.getLogger(__name__)
 
@@ -1343,6 +1344,7 @@ async def seed_demo_data(db: AsyncSession, admin_user: User) -> None:
             status=c_data.status,
             priority=c_data.priority,
             origin=c_data.origin,
+            case_number=await _generate_case_number(db),
             **audit,
         )
         db.add(case)
